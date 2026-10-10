@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>麦麦口味推荐官 · 在线演示</title>
+<meta name="description" content="告诉它你想吃什么味，它从 67 款麦当劳餐品的口味图谱里帮你找。零 Token、打开即玩。">
+<style>
+  :root{
+    --navy:#002060;
+    --navy-2:#1b3b7a;
+    --gold:#FFC000;
+    --ink:#1a1a1a;
+    --ink-2:#5a6270;
+    --line:#e3e7ee;
+    --bg:#ffffff;
+    --bg-2:#f7f9fc;
+    --ok:#1a7f4b;
+    --warn:#b06a00;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.65;
+    font-size:16px;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px 72px}
+
+  /* ---------- Hero ---------- */
+  header{
+    background:var(--navy);color:#fff;
+    padding:40px 18px 34px;margin-bottom:0;
+  }
+  header .inner{max-width:760px;margin:0 auto}
+  h1{font-size:29px;font-weight:800;letter-spacing:.5px;line-height:1.3}
+  h1 .accent{color:var(--gold)}
+  .sub{margin-top:12px;font-size:16px;color:#cfd8ea;line-height:1.7}
+  .meta{margin-top:18px;font-size:13px;color:#93a4c4}
+  .tagbar{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+  .tagbar span{
+    font-size:13px;padding:4px 11px;border-radius:20px;
+    background:rgba(255,192,0,.16);color:var(--gold);font-weight:600;
+  }
+
+  /* ---------- Section ---------- */
+  section{margin-top:34px}
+  h2{
+    font-size:20px;font-weight:800;color:var(--navy);
+    padding-left:12px;border-left:5px solid var(--gold);
+    margin-bottom:6px;line-height:1.3;
+  }
+  .hint{font-size:14px;color:var(--ink-2);margin:10px 0 16px}
+
+  /* ---------- Tabs ---------- */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .tab{
+    font-size:15px;font-weight:600;padding:9px 17px;border-radius:9px;
+    border:1.5px solid var(--line);background:#fff;color:var(--ink-2);
+    cursor:pointer;transition:.15s;
+  }
+  .tab:hover{border-color:var(--navy-2);color:var(--navy)}
+  .tab.on{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  /* ---------- Input ---------- */
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  input[type=text]{
+    flex:1 1 240px;font-size:16px;padding:13px 15px;border-radius:9px;
+    border:1.5px solid var(--line);outline:none;font-family:inherit;
+    background:#fff;color:var(--ink);
+  }
+  input[type=text]:focus{border-color:var(--navy-2)}
+  button.go{
+    font-size:16px;font-weight:700;padding:13px 26px;border-radius:9px;
+    border:none;background:var(--gold);color:var(--navy);cursor:pointer;
+    transition:.15s;white-space:nowrap;
+  }
+  button.go:hover{filter:brightness(.94)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .chip{
+    font-size:14px;padding:6px 13px;border-radius:20px;cursor:pointer;
+    background:var(--bg-2);border:1px solid var(--line);color:var(--ink-2);
+    transition:.15s;
+  }
+  .chip:hover{background:#eef3fb;border-color:var(--navy-2);color:var(--navy)}
+
+  /* ---------- Result ---------- */
+  .profile{
+    margin:18px 0 4px;padding:13px 16px;border-radius:9px;
+    background:var(--bg-2);border-left:4px solid var(--gold);
+    font-size:15px;
+  }
+  .profile b{color:var(--navy)}
+  .card{
+    border:1.5px solid var(--line);border-radius:12px;padding:17px 18px;
+    margin-top:13px;background:#fff;transition:.15s;
+  }
+  .card:hover{border-color:#c8d3e6;box-shadow:0 3px 14px rgba(0,32,96,.07)}
+  .card-top{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap}
+  .rank{
+    font-size:13px;font-weight:800;color:var(--navy);background:var(--gold);
+    width:23px;height:23px;border-radius:6px;display:inline-flex;
+    align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .name{font-size:18px;font-weight:800;color:var(--navy)}
+  .cat{font-size:13px;color:var(--ink-2);background:var(--bg-2);
+       padding:2px 9px;border-radius:5px}
+  .score{margin-left:auto;font-size:16px;font-weight:800;color:var(--ok)}
+  .bars{margin-top:13px;display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:7px 14px}
+  .bar{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-2)}
+  .bar .lb{width:17px;flex-shrink:0;font-weight:600}
+  .bar .track{flex:1;height:7px;background:#edf0f5;border-radius:4px;overflow:hidden}
+  .bar .fill{height:100%;background:var(--navy-2);border-radius:4px}
+  .tex{margin-top:12px;font-size:14px;color:var(--ink-2)}
+  .why{margin-top:11px;font-size:14px;color:var(--ok)}
+  .why div{padding-left:15px;position:relative}
+  .why div:before{content:"→";position:absolute;left:0;color:var(--gold);font-weight:800}
+  .ev{margin-top:11px;font-size:13px;color:var(--ink-2);background:var(--bg-2);
+      padding:10px 13px;border-radius:7px;line-height:1.6}
+  .ev b{color:var(--navy);font-weight:700}
+
+  /* ---------- Combo ---------- */
+  .combo{border:2px solid var(--navy);border-radius:12px;padding:19px;margin-top:16px;background:#fff}
+  .combo-line{display:flex;justify-content:space-between;gap:12px;padding:7px 0;
+              border-bottom:1px dashed var(--line);font-size:15px}
+  .combo-line:last-of-type{border-bottom:none}
+  .combo-total{
+    margin-top:14px;padding-top:14px;border-top:2px solid var(--navy);
+    display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;
+  }
+  .combo-total .pay{font-size:25px;font-weight:800;color:var(--navy)}
+  .combo-total .save{font-size:14px;color:var(--ok);font-weight:700}
+  .nut{margin-top:12px;font-size:14px;color:var(--ink-2);
+       background:var(--bg-2);padding:11px 14px;border-radius:8px;line-height:1.7}
+  .nut .none{color:var(--warn);font-weight:700}
+
+  /* ---------- Map / footer ---------- */
+  details.map{margin-top:20px;border:1.5px solid var(--line);border-radius:11px;overflow:hidden}
+  details.map summary{
+    cursor:pointer;padding:14px 18px;font-weight:700;color:var(--navy);
+    background:var(--bg-2);font-size:16px;
+  }
+  details.map .body{padding:6px 18px 18px}
+  .mrow{display:flex;align-items:center;gap:12px;padding:1px 0;font-size:13.5px;
+        color:var(--ink-2)}
+  .mname{width:178px;flex-shrink:0;color:var(--ink);font-weight:600;
+         white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mfl{flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--navy-2)}
+
+  footer{
+    margin-top:44px;padding-top:22px;border-top:1px solid var(--line);
+    font-size:13px;color:var(--ink-2);line-height:1.8;
+  }
+  footer b{color:var(--navy)}
+  footer a{color:var(--navy-2)}
+  .err{color:#b3261e;font-size:15px;padding:14px;background:#fdf1f0;
+       border-radius:9px;margin-top:14px}
+  .empty{color:var(--ink-2);font-size:15px;padding:14px;background:var(--bg-2);
+         border-radius:9px;margin-top:14px}
+</style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <h1>麦麦<span class="accent">口味</span>推荐官</h1>
+    <p class="sub">告诉它你想吃什么味，它从 67 款麦当劳餐品的口味图谱里帮你找——
+       再顺手把营养和优惠券都算好。</p>
+    <div class="tagbar">
+      <span>零 Token</span><span>打开即玩</span><span>67 款口味图谱</span><span>每条附配料依据</span>
+    </div>
+    <div class="meta">麦当劳程序员创意开发大赛参赛作品 · 非麦当劳官方产品</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <h2>开始找吃的</h2>
+    <p class="hint">三种方式任选。<b>不知道想吃啥</b>就点下面的快捷标签。</p>
+    <div class="tabs">
+      <button class="tab on" data-mode="want">我想吃…</button>
+      <button class="tab" data-mode="like">和这个类似</button>
+      <button class="tab" data-mode="surprise">随便给我一个</button>
+    </div>
+
+    <div class="row">
+      <input type="text" id="q" placeholder="例如：想吃甜的，要酥脆的，不要牛肉">
+      <button class="go" id="run">推荐</button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section id="resultSec" style="display:none">
+    <h2>推荐结果</h2>
+    <div id="profile"></div>
+    <div id="cards"></div>
+
+    <div style="margin-top:26px">
+      <h2>顺手配一餐</h2>
+      <p class="hint">在上面推荐到的餐品里，帮你凑一份最省的一餐，并自动选最划算的券。</p>
+      <div class="row">
+        <input type="text" id="budget" placeholder="预算（元），例如 30" value="30">
+        <button class="go" id="combo">配一餐</button>
+      </div>
+      <div id="comboOut"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>口味图谱（全部 67 款）</h2>
+    <p class="hint">这是我给每款餐品标注的口味。每条都附配料依据，可逐条溯源。</p>
+    <details class="map">
+      <summary>展开查看 · 点击任意一行可拿它当推荐基准</summary>
+      <div class="body" id="mapBody"></div>
+    </details>
+  </section>
+
+  <footer>
+    <p><b>数据说明（请务必阅读）</b></p>
+    <p>· 口味标签为<b>基于公开配料信息的结构化推断</b>，非麦当劳官方数据，附配料依据可溯源；</p>
+    <p>· 价格与营养为<b>离线演示占位数据</b>，未与官方核验，仅用于跑通算法；</p>
+    <p>· 真实运行时，菜单/营养/价格/优惠券通过<b>麦当劳官方 MCP</b> 实时获取，
+       并用官方 calculate-price 复核金额；</p>
+    <p>· 输出仅供参考，<b>不构成医疗、营养或其他专业建议</b>；
+       餐品信息、价格及供应状态以麦当劳官方渠道的实时结果为准。</p>
+    <p style="margin-top:12px">
+      源码与完整文档：<a href="https://github.com/yx165165/mcd-flavor-scout">github.com/yx165165/mcd-flavor-scout</a>
+    </p>
+  </footer>
+</div>
+
+<script>
+/* ===================================================================
+   数据（内嵌，与仓库 data/ 目录同源）
+   =================================================================== */
+const LIB = {"_meta":{"name":"麦麦口味图谱 flavor_tags","version":"1.0.0","updated":"2026-10-10","disclaimer":"本口味标签为『基于公开配料信息的结构化推断』，非麦当劳官方数据。每条标签均附 evidence 字段记录推断依据，可逐条溯源。口味强度为 0-5 的相对刻度，用于同类菜品间的相对比较，不等同于绝对感官评测值。","flavor_dimensions":{"sweet":"甜度（糖、酱料、乳制品带来的甜味）","salty":"咸度（盐、酱料、芝士、培根/火腿等腌制肉类）","spicy":"辣度（辣椒腌渍、辣味裹粉、辣酱）","sour":"酸度（番茄酱、芥末、泡菜、塔塔酱、柑橘、碳酸）","bitter":"苦度（咖啡、可可）","umami":"鲜味/肉香（牛肉、鸡肉、芝士、鱼、菌菇）"},"texture_vocab":["酥脆","软嫩","多汁","绵密","爽脆","有嚼劲","颗粒感","顺滑","碳酸刺激感"],"temp_vocab":["hot","cold","room"],"evidence_policy":"依据来源优先级：① 麦当劳官方渠道（官网产品页成分说明、官网热点更新、台湾官网产品信息、MCP 返回字段）；② 权威第三方词条（如百度百科对单品的配料描述）；③ 通用食品工艺常识。凡属推断而非官方直述者，均在 evidence 中标注『推断』。"},"items":[{"name":"巨无霸","aliases":["Big Mac","巨无霸汉堡"],"category":"burger","temp":"hot","flavor":{"sweet":3,"salty":4,"spicy":0,"sour":2,"bitter":0,"umami":4},"texture":["多汁","软嫩","爽脆"],"evidence":"配料：芝麻面包 + 双层 100% 纯牛肉饼 + 生菜 + 切达芝士 + 酸黄瓜 + 洋葱 + 巨无霸酱。巨无霸酱为甜酸风味酱料（推断 甜3/酸2）；牛肉饼与芝士提供鲜味（鲜4）；生菜与酸黄瓜带来爽脆口感。"},{"name":"双层吉士汉堡","aliases":["Double Cheeseburger","双吉","双层芝士汉堡"],"category":"burger","temp":"hot","flavor":{"sweet":2,"salty":4,"spicy":0,"sour":2,"bitter":0,"umami":4},"texture":["多汁","软嫩"],"evidence":"配料：常规面包 + 双层 100% 牛肉饼 + 加工切达奶酪片 + 番茄酱 + 芥末 + 洋葱 + 泡菜片（第三方词条明确列出）。番茄酱偏甜（甜2）、芥末与泡菜偏酸（酸2）、牛肉+切达提供鲜味（鲜4）。"},{"name":"吉士汉堡","aliases":["Cheeseburger","单层吉士汉堡"],"category":"burger","temp":"hot","flavor":{"sweet":2,"salty":4,"spicy":0,"sour":2,"bitter":0,"umami":3},"texture":["多汁","软嫩"],"evidence":"与双层吉士同配方但仅单层牛肉饼，故鲜味与饱口度低于双吉（鲜3），咸酸甜结构一致。"},{"name":"汉堡","aliases":["Hamburger","牛肉汉堡"],"category":"burger","temp":"hot","flavor":{"sweet":2,"salty":3,"spicy":0,"sour":2,"bitter":0,"umami":3},"texture":["软嫩"],"evidence":"配料：面包 + 单层牛肉饼 + 番茄酱 + 芥末 + 洋葱 + 酸黄瓜，无芝士。因缺芝士，咸度与鲜味均低于吉士汉堡各 1 档（推断）。"},{"name":"麦辣鸡腿汉堡","aliases":["麦辣鸡腿堡","Spicy Chicken Burger"],"category":"burger","temp":"hot","flavor":{"sweet":1,"salty":4,"spicy":4,"sour":1,"bitter":0,"umami":3},"texture":["酥脆","多汁"],"evidence":"配料：辣味腌渍鸡腿排（炸制）+ 生菜 + 沙拉酱。辣度来自辣椒腌渍与辣味裹粉，属该品牌辣度最高一档（辣4）；炸鸡外皮提供酥脆感。"},{"name":"板烧鸡腿堡","aliases":["Grilled Chicken Burger","板烧鸡腿汉堡"],"category":"burger","temp":"hot","flavor":{"sweet":2,"salty":3,"spicy":0,"sour":0,"bitter":0,"umami":4},"texture":["多汁","软嫩"],"evidence":"配料：板烧（铁板煎制）鸡腿排 + 生菜 + 蛋黄酱。板烧腌渍汁含酱油与糖，呈轻微甜咸（甜2）；非油炸故口感偏多汁软嫩而非酥脆。"},{"name":"麦香鸡","aliases":["McChicken","麦香鸡汉堡"],"category":"burger","temp":"hot","flavor":{"sweet":1,"salty":3,"spicy":0,"sour":1,"bitter":0,"umami":3},"texture":["酥脆","软嫩"],"evidence":"配料：炸鸡排 + 生菜 + 蛋黄酱。配料结构简单，口味以咸鲜为主，无辣无甜味来源。"},{"name":"麦香鱼","aliases":["Filet-O-Fish","麦香鱼汉堡"],"category":"burger","temp":"hot","flavor":{"sweet":1,"salty":3,"spicy":0,"sour":2,"bitter":0,"umami":3},"texture":["酥脆","软嫩"],"evidence":"配料：方形鳕鱼排（面包糠裹粉炸）+ 塔塔酱 + 半片芝士 + 蒸制面包。塔塔酱含酸黄瓜碎，呈微酸甜（甜1/酸2）；蒸包质地显著偏软（软嫩）。"},{"name":"芝士安格斯厚牛堡","aliases":["安格斯厚牛堡","Angus Cheeseburger"],"category":"burger","temp":"hot","flavor":{"sweet":1,"salty":4,"spicy":0,"sour":1,"bitter":0,"umami":5},"texture":["多汁","软嫩"],"evidence":"配料：加大牛肉饼（安格斯）+ 芝士。官网热点更新说明安格斯系列牛肉饼均为纯安格斯牛肉、采用无油煎制工艺。牛肉含量高，鲜味（肉香）为全菜单最高档之一（鲜5）。"},{"name":"培根安格斯厚牛堡","aliases":["培根安格斯"],"category":"burger","temp":"hot","flavor":{"sweet":1,"salty":5,"spicy":0,"sour":1,"bitter":0,"umami":5},"texture":["多汁","酥脆"],"evidence":"配料：安格斯牛肉饼 + 培根 + 芝士。官网热点更新明确『培根安格斯厚牛堡中的培根为猪肉』。培根属高盐腌制肉类，使咸度达到全菜单最高档（咸5）；煎脆培根提供酥脆感。"},{"name":"白松露风味法式火腿安格斯厚牛堡","aliases":["白松露安格斯","法式火腿安格斯"],"category":"burger","temp":"hot","flavor":{"sweet":1,"salty":5,"spicy":0,"sour":1,"bitter":0,"umami":5},"texture":["多汁","软嫩"],"evidence":"官网热点更新明确『白松露风味法式火腿安格斯厚牛堡中的法式火腿和培根为猪肉』『汉堡中添加为白松露制作的白松露风味酱汁』。火腿为高盐腌制品（咸5）；白松露风味酱汁带来独特菌菇香气（归入鲜味维度）。"},{"name":"深海鳕鱼堡","aliases":["鳕鱼堡"],"category":"burger","temp":"hot","flavor":{"sweet":1,"salty":3,"spicy":0,"sour":2,"bitter":0,"umami":3},"texture":["酥脆","软嫩"],"evidence":"配料：裹粉炸鳕鱼排 + 酱料 + 生菜。鱼肉本身清淡，口味主要由塔塔类酱料与裹粉调味决定，结构与麦香鱼相近（推断）。"},{"name":"大大鸡排堡","aliases":["大鸡排堡"],"category":"burger","temp":"hot","flavor":{"sweet":1,"salty":4,"spicy":1,"sour":1,"bitter":0,"umami":3},"texture":["酥脆","多汁"],"evidence":"配料：大块裹粉炸鸡排 + 生菜 + 酱料。裹粉调味含轻微黑胡椒，故辣度记 1（推断）。"},{"name":"黑椒厚牛堡","aliases":["黑椒牛肉堡"],"category":"burger","temp":"hot","flavor":{"sweet":1,"salty":4,"spicy":2,"sour":1,"bitter":0,"umami":4},"texture":["多汁","软嫩"],"evidence":"配料：牛肉饼 + 黑胡椒酱。黑胡椒提供辛香刺激感，归入辣度维度记 2（非辣椒辣，属胡椒辛味，推断）。"},{"name":"小薯条","aliases":["薯条(小)"],"category":"side","temp":"hot","flavor":{"sweet":0,"salty":4,"spicy":0,"sour":0,"bitter":0,"umami":2},"texture":["酥脆","绵密"],"evidence":"官网产品信息：马铃薯切条、以植物油高温炸制，表面撒盐。官网原文描述薯条品质为『外层金黄酥脆、内里绵密细致』，故 texture 同时含酥脆与绵密；咸味来自表面加盐（咸4）。"},{"name":"中薯条","aliases":["薯条(中)"],"category":"side","temp":"hot","flavor":{"sweet":0,"salty":4,"spicy":0,"sour":0,"bitter":0,"umami":2},"texture":["酥脆","绵密"],"evidence":"同小薯条，仅份量不同。"},{"name":"大薯条","aliases":["薯条(大)"],"category":"side","temp":"hot","flavor":{"sweet":0,"salty":4,"spicy":0,"sour":0,"bitter":0,"umami":2},"texture":["酥脆","绵密"],"evidence":"同小薯条，仅份量不同。"},{"name":"麦乐鸡(5块)","aliases":["麦乐鸡块","鸡块5块","McNuggets"],"category":"side","temp":"hot","flavor":{"sweet":1,"salty":3,"spicy":1,"sour":0,"bitter":0,"umami":3},"texture":["酥脆","软嫩"],"evidence":"麦当劳台湾官网原文：『鷄肉於調味裹層後，使用經過安全認證的進口植物油烹炸，成為口感微酥柔嫩』。裹粉调味含少量胡椒（辣1）。实际口味高度依赖蘸酱（酸甜酱/糖醋酱/芥末酱），此处仅记录鸡块本体。"},{"name":"麦乐鸡(10块)","aliases":["鸡块10块"],"category":"side","temp":"hot","flavor":{"sweet":1,"salty":3,"spicy":1,"sour":0,"bitter":0,"umami":3},"texture":["酥脆","软嫩"],"evidence":"同麦乐鸡(5块)，仅份量不同。"},{"name":"麦辣鸡翅(2块)","aliases":["麦辣鸡翅","辣翅2块"],"category":"side","temp":"hot","flavor":{"sweet":0,"salty":4,"spicy":4,"sour":0,"bitter":0,"umami":3},"texture":["酥脆","多汁"],"evidence":"配料：辣味腌渍鸡翅裹粉炸制。辣度与麦辣鸡腿汉堡同级（辣4）；炸制外皮酥脆、翅肉多汁。"},{"name":"麦辣鸡翅(4块)","aliases":["辣翅4块"],"category":"side","temp":"hot","flavor":{"sweet":0,"salty":4,"spicy":4,"sour":0,"bitter":0,"umami":3},"texture":["酥脆","多汁"],"evidence":"同麦辣鸡翅(2块)，仅份量不同。"},{"name":"那么大鸡排","aliases":["大鸡排"],"category":"side","temp":"hot","flavor":{"sweet":1,"salty":4,"spicy":2,"sour":0,"bitter":0,"umami":3},"texture":["酥脆","多汁"],"evidence":"配料：大块裹粉炸鸡排。裹粉调味偏咸香，含轻微胡椒辛味（辣2，推断）。"},{"name":"玉米杯","aliases":["甜玉米杯"],"category":"side","temp":"hot","flavor":{"sweet":4,"salty":0,"spicy":0,"sour":0,"bitter":0,"umami":1},"texture":["绵密","颗粒感"],"evidence":"配料：甜玉米粒。甜味为玉米本身天然甜（甜4），无额外调味。颗粒感来自玉米粒形态。"},{"name":"苹果片","aliases":["苹果切片"],"category":"side","temp":"cold","flavor":{"sweet":3,"salty":0,"spicy":0,"sour":2,"bitter":0,"umami":0},"texture":["爽脆"],"evidence":"配料：鲜切苹果。天然果糖（甜3）与苹果酸（酸2）并存，口感爽脆。"},{"name":"香芋派","aliases":["芋头派"],"category":"side","temp":"hot","flavor":{"sweet":5,"salty":1,"spicy":0,"sour":0,"bitter":0,"umami":0},"texture":["酥脆","绵密"],"evidence":"配料：酥皮 + 香芋馅。酥皮炸制（酥脆），芋泥馅为高糖甜馅（甜5）。"},{"name":"菠萝派","aliases":["菠萝派(热)"],"category":"side","temp":"hot","flavor":{"sweet":5,"salty":1,"spicy":0,"sour":2,"bitter":0,"umami":0},"texture":["酥脆","绵密"],"evidence":"配料：酥皮 + 菠萝果酱馅。菠萝含果酸，故甜中带酸（甜5/酸2）。"},{"name":"巧克力派","aliases":[],"category":"side","temp":"hot","flavor":{"sweet":5,"salty":1,"spicy":0,"sour":0,"bitter":1,"umami":0},"texture":["酥脆","绵密"],"evidence":"配料：酥皮 + 巧克力馅。可可带来轻微苦感（苦1）。"},{"name":"薯饼","aliases":["hash brown"],"category":"side","temp":"hot","flavor":{"sweet":0,"salty":3,"spicy":0,"sour":0,"bitter":0,"umami":1},"texture":["酥脆"],"evidence":"配料：马铃薯丝压制成型后炸制。以酥脆为唯一主要质感，调味仅盐。"},{"name":"中杯可乐","aliases":["可口可乐","可乐(中)"],"category":"drink","temp":"cold","flavor":{"sweet":5,"salty":0,"spicy":0,"sour":2,"bitter":0,"umami":0},"texture":["碳酸刺激感"],"evidence":"配料：碳酸水 + 糖 + 焦糖色 + 磷酸 + 咖啡因。磷酸与二氧化碳带来酸感与刺激感（酸2）；含糖量为全饮品最高档（甜5）。"},{"name":"大杯可乐","aliases":["可乐(大)"],"category":"drink","temp":"cold","flavor":{"sweet":5,"salty":0,"spicy":0,"sour":2,"bitter":0,"umami":0},"texture":["碳酸刺激感"],"evidence":"同中杯可乐，仅容量不同。"},{"name":"中杯雪碧","aliases":["雪碧"],"category":"drink","temp":"cold","flavor":{"sweet":5,"salty":0,"spicy":0,"sour":3,"bitter":0,"umami":0},"texture":["碳酸刺激感"],"evidence":"配料：碳酸水 + 糖 + 柠檬酸。柠檬酸使酸度高于可乐（酸3）；无焦糖色与磷酸，口味更清亮。"},{"name":"中杯芬达","aliases":["芬达","橙味汽水"],"category":"drink","temp":"cold","flavor":{"sweet":5,"salty":0,"spicy":0,"sour":2,"bitter":0,"umami":0},"texture":["碳酸刺激感"],"evidence":"配料：碳酸水 + 糖 + 橙味香精。以甜味为主导（甜5），酸度中等。"},{"name":"中杯橙汁","aliases":["橙汁"],"category":"drink","temp":"cold","flavor":{"sweet":3,"salty":0,"spicy":0,"sour":3,"bitter":0,"umami":0},"texture":["顺滑"],"evidence":"配料：橙汁（浓缩还原）。天然果糖（甜3）与柠檬酸/抗坏血酸（酸3）平衡，酸甜比明显低于汽水类。"},{"name":"美式咖啡(中杯)","aliases":["美式咖啡","热美式","Americano"],"category":"drink","temp":"hot","flavor":{"sweet":0,"salty":0,"spicy":0,"sour":1,"bitter":5,"umami":0},"texture":["顺滑"],"evidence":"配料：浓缩咖啡 + 水。咖啡因与烘焙产物带来全饮品最高苦度（苦5）；咖啡本身含有机酸（酸1）；无糖无奶。"},{"name":"中杯拿铁","aliases":["拿铁","Latte"],"category":"drink","temp":"hot","flavor":{"sweet":2,"salty":0,"spicy":0,"sour":0,"bitter":3,"umami":1},"texture":["顺滑","绵密"],"evidence":"配料：浓缩咖啡 + 大量蒸奶。乳糖带来甜感（甜2），牛奶稀释咖啡苦味至中等（苦3）；奶泡提供绵密质感。"},{"name":"卡布奇诺","aliases":["Cappuccino","卡布"],"category":"drink","temp":"hot","flavor":{"sweet":2,"salty":0,"spicy":0,"sour":0,"bitter":3,"umami":1},"texture":["绵密","顺滑"],"evidence":"配料：浓缩咖啡 + 蒸奶 + 厚奶泡。与拿铁相近，但奶泡比例更高、咖啡味更突出，故苦度与拿铁同档而绵密度更高。"},{"name":"焦糖玛奇朵","aliases":["Caramel Macchiato"],"category":"drink","temp":"hot","flavor":{"sweet":4,"salty":0,"spicy":0,"sour":0,"bitter":3,"umami":1},"texture":["顺滑","绵密"],"evidence":"配料：浓缩咖啡 + 蒸奶 + 香草糖浆 + 焦糖酱。焦糖与香草糖浆显著提升甜度（甜4），是咖啡类中偏甜的一款。"},{"name":"摩卡","aliases":["Mocha","摩卡咖啡"],"category":"drink","temp":"hot","flavor":{"sweet":4,"salty":0,"spicy":0,"sour":0,"bitter":3,"umami":1},"texture":["顺滑","绵密"],"evidence":"配料：浓缩咖啡 + 蒸奶 + 巧克力酱。巧克力兼具甜与微苦（甜4/苦3）。"},{"name":"热巧克力","aliases":["热可可"],"category":"drink","temp":"hot","flavor":{"sweet":5,"salty":0,"spicy":0,"sour":0,"bitter":2,"umami":1},"texture":["顺滑","绵密"],"evidence":"配料：可可粉 + 牛奶 + 糖。以甜为主（甜5），可可带轻微苦味（苦2）。"},{"name":"中杯冰红茶","aliases":["冰红茶"],"category":"drink","temp":"cold","flavor":{"sweet":3,"salty":0,"spicy":0,"sour":1,"bitter":1,"umami":0},"texture":["顺滑"],"evidence":"配料：红茶 + 糖 + 柠檬。茶多酚带来轻涩苦感（苦1），含糖故甜（甜3）。"},{"name":"矿泉水","aliases":["瓶装水"],"category":"drink","temp":"room","flavor":{"sweet":0,"salty":0,"spicy":0,"sour":0,"bitter":0,"umami":0},"texture":["顺滑"],"evidence":"配料：饮用水。无任何呈味物质，六维全 0 —— 可作为口味向量的原点参照。"},{"name":"豆浆","aliases":["热豆浆"],"category":"drink","temp":"hot","flavor":{"sweet":2,"salty":0,"spicy":0,"sour":0,"bitter":0,"umami":1},"texture":["顺滑"],"evidence":"配料：大豆研磨浆液（早餐时段供应）。含少量天然糖分（甜2），豆香归入鲜味维度。"},{"name":"原味甜筒","aliases":["甜筒","冰淇淋甜筒","香草甜筒"],"category":"dessert","temp":"cold","flavor":{"sweet":4,"salty":1,"spicy":0,"sour":0,"bitter":0,"umami":1},"texture":["绵密"],"evidence":"配料：软冰淇淋（奶 + 糖）+ 华夫筒。乳制品带来奶香（鲜1）与微咸（咸1，乳中天然矿物质）。"},{"name":"奥利奥麦旋风","aliases":["麦旋风","奥利奥麦旋风冰淇淋"],"category":"dessert","temp":"cold","flavor":{"sweet":5,"salty":1,"spicy":0,"sour":0,"bitter":1,"umami":1},"texture":["绵密","颗粒感"],"evidence":"配料：软冰淇淋 + 奥利奥饼干碎。饼干碎提供颗粒咀嚼感，可可饼皮带来轻微苦味（苦1）。"},{"name":"草莓麦旋风","aliases":["草莓麦旋风冰淇淋"],"category":"dessert","temp":"cold","flavor":{"sweet":5,"salty":1,"spicy":0,"sour":2,"bitter":0,"umami":1},"texture":["绵密","颗粒感"],"evidence":"配料：软冰淇淋 + 草莓酱/草莓碎。草莓果酸使甜中带酸（甜5/酸2）。"},{"name":"新地(巧克力)","aliases":["巧克力新地","圣代"],"category":"dessert","temp":"cold","flavor":{"sweet":5,"salty":1,"spicy":0,"sour":0,"bitter":1,"umami":1},"texture":["绵密","顺滑"],"evidence":"配料：软冰淇淋 + 巧克力酱。巧克力酱提升甜度并带来轻微苦味。"},{"name":"新地(草莓)","aliases":["草莓新地"],"category":"dessert","temp":"cold","flavor":{"sweet":5,"salty":1,"spicy":0,"sour":2,"bitter":0,"umami":1},"texture":["绵密","顺滑"],"evidence":"配料：软冰淇淋 + 草莓酱。草莓果酸带来酸度（酸2）。"},{"name":"香草冰淇淋","aliases":["冰淇淋(杯)","杯装冰淇淋"],"category":"dessert","temp":"cold","flavor":{"sweet":4,"salty":1,"spicy":0,"sour":0,"bitter":0,"umami":1},"texture":["绵密","顺滑"],"evidence":"配料：软冰淇淋（奶 + 糖）。纯奶香基底，无额外酱料。"},{"name":"芝士蛋糕","aliases":["乳酪蛋糕"],"category":"dessert","temp":"cold","flavor":{"sweet":4,"salty":2,"spicy":0,"sour":2,"bitter":0,"umami":2},"texture":["绵密","顺滑"],"evidence":"配料：奶油奶酪 + 糖 + 饼干底。奶油奶酪本身带天然咸味与乳酸酸味（咸2/酸2），是甜品中少见的咸甜并存款。"},{"name":"提拉米苏","aliases":["Tiramisu"],"category":"dessert","temp":"cold","flavor":{"sweet":4,"salty":1,"spicy":0,"sour":0,"bitter":2,"umami":2},"texture":["绵密","顺滑"],"evidence":"配料：马斯卡彭奶酪 + 咖啡液浸泡手指饼 + 可可粉。咖啡与可可带来明显苦味（苦2）。"},{"name":"猪柳蛋麦满分","aliases":["猪柳蛋麦满分汉堡","Sausage McMuffin with Egg"],"category":"breakfast","temp":"hot","flavor":{"sweet":1,"salty":4,"spicy":1,"sour":0,"bitter":0,"umami":4},"texture":["软嫩","多汁"],"evidence":"配料：英式马芬 + 猪柳肉饼 + 煎蛋 + 芝士（早餐时段供应）。猪柳为调味猪肉饼，咸香（咸4）；煎蛋与芝士提供软嫩与鲜味。"},{"name":"猪柳麦满分","aliases":["Sausage McMuffin"],"category":"breakfast","temp":"hot","flavor":{"sweet":1,"salty":4,"spicy":1,"sour":0,"bitter":0,"umami":3},"texture":["软嫩"],"evidence":"配料：英式马芬 + 猪柳肉饼 + 芝士，无蛋。较猪柳蛋麦满分少一层蛋的软嫩与鲜味。"},{"name":"烟肉蛋麦满分","aliases":["培根蛋麦满分","Bacon & Egg McMuffin"],"category":"breakfast","temp":"hot","flavor":{"sweet":1,"salty":5,"spicy":1,"sour":0,"bitter":0,"umami":4},"texture":["软嫩","酥脆"],"evidence":"配料：英式马芬 + 烟肉（培根）+ 煎蛋 + 芝士。烟肉为高盐腌制猪肉，咸度为早餐类最高（咸5），煎脆后提供酥脆感。"},{"name":"吉士蛋麦满分","aliases":["Cheeseburger McMuffin","芝士蛋麦满分"],"category":"breakfast","temp":"hot","flavor":{"sweet":1,"salty":4,"spicy":0,"sour":1,"bitter":0,"umami":3},"texture":["软嫩"],"evidence":"配料：英式马芬 + 煎蛋 + 芝士。无肉类，故鲜味低于含肉款，以蛋与芝士的咸鲜为主。"},{"name":"热香饼","aliases":["热香饼(3块)","pancake","松饼"],"category":"breakfast","temp":"hot","flavor":{"sweet":4,"salty":1,"spicy":0,"sour":0,"bitter":0,"umami":1},"texture":["软嫩","绵密"],"evidence":"配料：面糊煎制松饼 + 配糖浆/黄油。本体微甜，蘸糖浆后甜度显著上升（甜4）；质地松软。"},{"name":"早餐全餐","aliases":["早餐拼盘"],"category":"breakfast","temp":"hot","flavor":{"sweet":1,"salty":4,"spicy":1,"sour":1,"bitter":0,"umami":4},"texture":["软嫩","酥脆"],"evidence":"为多品组合餐（含蛋、肉、薯饼等），口味取各组成项的综合中位值（推断）。实际口味随所选组合变化。"},{"name":"油条","aliases":["早餐油条"],"category":"breakfast","temp":"hot","flavor":{"sweet":1,"salty":2,"spicy":0,"sour":0,"bitter":0,"umami":1},"texture":["酥脆","有嚼劲"],"evidence":"配料：小麦面团油炸。含少量盐（咸2），以面香为主，无明显调味。"},{"name":"脆薯饼","aliases":["薯饼(早餐)"],"category":"breakfast","temp":"hot","flavor":{"sweet":0,"salty":3,"spicy":0,"sour":0,"bitter":0,"umami":1},"texture":["酥脆"],"evidence":"同侧食薯饼，早餐时段供应。"},{"name":"火腿扒麦满分","aliases":["火腿蛋麦满分"],"category":"breakfast","temp":"hot","flavor":{"sweet":1,"salty":4,"spicy":0,"sour":0,"bitter":0,"umami":3},"texture":["软嫩"],"evidence":"配料：英式马芬 + 火腿扒 + 蛋 + 芝士。火腿为腌制品提供咸鲜（咸4）。"},{"name":"双层安格斯厚牛堡","aliases":["双层安格斯"],"category":"burger","temp":"hot","flavor":{"sweet":1,"salty":5,"spicy":0,"sour":1,"bitter":0,"umami":5},"texture":["多汁","软嫩"],"evidence":"配料：双层安格斯牛肉饼 + 芝士。官网热点更新说明安格斯系列牛肉饼为纯安格斯牛肉、无油煎制。双层牛肉使鲜味与咸度均为最高档（鲜5/咸5）。"},{"name":"麦辣鸡腿","aliases":["单点麦辣鸡腿"],"category":"side","temp":"hot","flavor":{"sweet":0,"salty":4,"spicy":4,"sour":0,"bitter":0,"umami":3},"texture":["酥脆","多汁"],"evidence":"与麦辣鸡腿汉堡所用鸡腿排同规格，辣味腌渍后裹粉炸制，辣4、炸制酥脆多汁。"},{"name":"苹果派","aliases":["苹果派(热)"],"category":"side","temp":"hot","flavor":{"sweet":5,"salty":1,"spicy":0,"sour":2,"bitter":0,"umami":0},"texture":["酥脆","绵密"],"evidence":"配料：酥皮 + 苹果果酱馅。苹果含果酸，甜中带酸（甜5/酸2）；酥皮炸制提供酥脆感。"},{"name":"冰拿铁","aliases":["冰拿铁咖啡"],"category":"drink","temp":"cold","flavor":{"sweet":2,"salty":0,"spicy":0,"sour":0,"bitter":3,"umami":1},"texture":["顺滑","绵密"],"evidence":"配料：浓缩咖啡 + 冰牛奶 + 冰块。甜苦结构与热拿铁一致，温度改为冰（cold）。"},{"name":"香草拿铁","aliases":["Vanilla Latte"],"category":"drink","temp":"hot","flavor":{"sweet":4,"salty":0,"spicy":0,"sour":0,"bitter":3,"umami":1},"texture":["顺滑","绵密"],"evidence":"配料：浓缩咖啡 + 蒸奶 + 香草糖浆。香草糖浆显著提升甜度（甜4），是咖啡类中偏甜的一款。"},{"name":"抹茶拿铁","aliases":["Matcha Latte"],"category":"drink","temp":"hot","flavor":{"sweet":3,"salty":0,"spicy":0,"sour":0,"bitter":2,"umami":1},"texture":["顺滑","绵密"],"evidence":"配料：抹茶粉 + 牛奶 + 糖。抹茶茶多酚带来轻涩苦感（苦2），含糖故偏甜（甜3）。"},{"name":"麦咖啡可颂","aliases":["可颂","牛角包"],"category":"breakfast","temp":"hot","flavor":{"sweet":2,"salty":2,"spicy":0,"sour":0,"bitter":0,"umami":1},"texture":["酥脆","软嫩"],"evidence":"配料：黄油千层酥皮烘焙。黄油提供奶香与微甜（甜2）、含盐黄油带来咸味（咸2），层次结构提供酥脆感。"},{"name":"巧克力曲奇","aliases":["曲奇","饼干"],"category":"dessert","temp":"hot","flavor":{"sweet":5,"salty":1,"spicy":0,"sour":0,"bitter":1,"umami":1},"texture":["酥脆","颗粒感"],"evidence":"配料：小麦粉 + 黄油 + 巧克力豆。巧克力豆带来轻微苦味（苦1），整体以甜为主（甜5），口感酥脆带颗粒。"}]};
+const PRICES = {"_disclaimer":"【演示占位数据】以下价格与优惠券为离线演示用示例值，未与麦当劳官方实时菜单核验，仅用于在无 MCP Token 环境下跑通算法流程。真实运行时请通过麦当劳 MCP 的 query-meals / query-store-coupons / available-coupons 获取实时数据，并用 calculate-price 复核金额。","_source":"MCP tools: query-meals, query-store-coupons, available-coupons, calculate-price","items":[{"name":"巨无霸","price":22.5},{"name":"双层吉士汉堡","price":18.5},{"name":"吉士汉堡","price":12.0},{"name":"汉堡","price":11.0},{"name":"麦辣鸡腿汉堡","price":20.0},{"name":"板烧鸡腿堡","price":19.5},{"name":"麦香鸡","price":13.0},{"name":"麦香鱼","price":14.5},{"name":"芝士安格斯厚牛堡","price":28.0},{"name":"培根安格斯厚牛堡","price":30.0},{"name":"白松露风味法式火腿安格斯厚牛堡","price":32.0},{"name":"深海鳕鱼堡","price":17.0},{"name":"大大鸡排堡","price":16.0},{"name":"黑椒厚牛堡","price":25.0},{"name":"小薯条","price":8.0},{"name":"中薯条","price":10.5},{"name":"大薯条","price":12.0},{"name":"麦乐鸡(5块)","price":11.0},{"name":"麦乐鸡(10块)","price":20.0},{"name":"麦辣鸡翅(2块)","price":12.5},{"name":"麦辣鸡翅(4块)","price":23.0},{"name":"那么大鸡排","price":15.0},{"name":"玉米杯","price":7.5},{"name":"苹果片","price":6.0},{"name":"香芋派","price":8.0},{"name":"菠萝派","price":8.0},{"name":"巧克力派","price":8.0},{"name":"薯饼","price":7.0},{"name":"中杯可乐","price":9.0},{"name":"大杯可乐","price":10.5},{"name":"中杯雪碧","price":9.0},{"name":"中杯芬达","price":9.0},{"name":"中杯橙汁","price":12.0},{"name":"美式咖啡(中杯)","price":12.0},{"name":"中杯拿铁","price":15.0},{"name":"卡布奇诺","price":16.0},{"name":"焦糖玛奇朵","price":18.0},{"name":"摩卡","price":18.0},{"name":"热巧克力","price":15.0},{"name":"中杯冰红茶","price":10.0},{"name":"矿泉水","price":6.0},{"name":"豆浆","price":7.0},{"name":"原味甜筒","price":4.0},{"name":"奥利奥麦旋风","price":11.5},{"name":"草莓麦旋风","price":11.5},{"name":"新地(巧克力)","price":11.0},{"name":"新地(草莓)","price":11.0},{"name":"香草冰淇淋","price":10.0},{"name":"芝士蛋糕","price":16.0},{"name":"提拉米苏","price":18.0},{"name":"猪柳蛋麦满分","price":16.0},{"name":"猪柳麦满分","price":14.0},{"name":"烟肉蛋麦满分","price":16.0},{"name":"吉士蛋麦满分","price":14.0},{"name":"热香饼","price":14.0},{"name":"早餐全餐","price":25.0},{"name":"油条","price":5.0},{"name":"脆薯饼","price":7.0},{"name":"火腿扒麦满分","price":15.0},{"name":"双层安格斯厚牛堡","price":32.0},{"name":"麦辣鸡腿","price":13.0},{"name":"苹果派","price":7.0},{"name":"冰拿铁","price":16.0},{"name":"香草拿铁","price":17.0},{"name":"抹茶拿铁","price":17.0},{"name":"麦咖啡可颂","price":10.0},{"name":"巧克力曲奇","price":6.0}],"coupons":[{"code":"C001","name":"满30减6","kind":"threshold","threshold":30,"amount":6},{"code":"C002","name":"满40减10","kind":"threshold","threshold":40,"amount":10},{"code":"C003","name":"满20减3","kind":"threshold","threshold":20,"amount":3},{"code":"C004","name":"巨无霸立减5元","kind":"item","targetName":"巨无霸","amount":5},{"code":"C005","name":"薯条立减3元","kind":"item","targetName":"中薯条","amount":3},{"code":"C006","name":"全场9折(封顶8元)","kind":"discount","rate":0.9,"maxOff":8}]};
+const NUTRI = {"_disclaimer":"【演示占位数据】以下营养数值为离线演示用近似值，未经麦当劳官方核验，仅用于在无 MCP Token 环境下跑通算法流程。真实运行时请通过麦当劳 MCP 的 list-nutrition-foods 获取官方营养数据。凡本表中未收录的餐品，程序会显示为「无」而不会用 0 或估计值填充。","_source":"MCP tool: list-nutrition-foods（真实运行请以此为准）","_units":{"calories":"kcal","protein":"g","fat":"g","carbs":"g","sodium":"mg"},"items":[{"name":"巨无霸","calories":503,"protein":26.5,"fat":25.0,"carbs":42.0,"sodium":960},{"name":"双层吉士汉堡","calories":452,"protein":27.0,"fat":24.0,"carbs":31.0,"sodium":840},{"name":"吉士汉堡","calories":300,"protein":15.0,"fat":13.0,"carbs":31.0,"sodium":700},{"name":"汉堡","calories":250,"protein":13.0,"fat":9.0,"carbs":30.0,"sodium":520},{"name":"麦辣鸡腿汉堡","calories":497,"protein":24.0,"fat":24.0,"carbs":45.0,"sodium":1050},{"name":"板烧鸡腿堡","calories":430,"protein":25.0,"fat":17.0,"carbs":43.0,"sodium":900},{"name":"麦香鸡","calories":400,"protein":17.0,"fat":19.0,"carbs":42.0,"sodium":820},{"name":"麦香鱼","calories":340,"protein":14.0,"fat":15.0,"carbs":37.0,"sodium":640},{"name":"芝士安格斯厚牛堡","calories":590,"protein":33.0,"fat":30.0,"carbs":45.0,"sodium":1100},{"name":"培根安格斯厚牛堡","calories":650,"protein":36.0,"fat":35.0,"carbs":45.0,"sodium":1400},{"name":"深海鳕鱼堡","calories":360,"protein":15.0,"fat":16.0,"carbs":38.0,"sodium":680},{"name":"大大鸡排堡","calories":450,"protein":22.0,"fat":21.0,"carbs":44.0,"sodium":900},{"name":"黑椒厚牛堡","calories":520,"protein":28.0,"fat":26.0,"carbs":40.0,"sodium":1000},{"name":"小薯条","calories":230,"protein":3.0,"fat":11.0,"carbs":30.0,"sodium":180},{"name":"中薯条","calories":340,"protein":4.0,"fat":16.0,"carbs":44.0,"sodium":270},{"name":"大薯条","calories":450,"protein":5.0,"fat":21.0,"carbs":58.0,"sodium":360},{"name":"麦乐鸡(5块)","calories":250,"protein":14.0,"fat":14.0,"carbs":16.0,"sodium":480},{"name":"麦乐鸡(10块)","calories":500,"protein":28.0,"fat":28.0,"carbs":32.0,"sodium":960},{"name":"麦辣鸡翅(2块)","calories":280,"protein":17.0,"fat":17.0,"carbs":14.0,"sodium":620},{"name":"麦辣鸡翅(4块)","calories":560,"protein":34.0,"fat":34.0,"carbs":28.0,"sodium":1240},{"name":"那么大鸡排","calories":480,"protein":26.0,"fat":27.0,"carbs":33.0,"sodium":1050},{"name":"玉米杯","calories":100,"protein":3.0,"fat":1.5,"carbs":22.0,"sodium":5},{"name":"苹果片","calories":45,"protein":0.3,"fat":0.2,"carbs":12.0,"sodium":2},{"name":"香芋派","calories":260,"protein":3.0,"fat":12.0,"carbs":35.0,"sodium":150},{"name":"菠萝派","calories":250,"protein":3.0,"fat":12.0,"carbs":34.0,"sodium":150},{"name":"巧克力派","calories":280,"protein":4.0,"fat":14.0,"carbs":35.0,"sodium":160},{"name":"薯饼","calories":150,"protein":1.5,"fat":8.0,"carbs":18.0,"sodium":310},{"name":"中杯可乐","calories":150,"protein":0.0,"fat":0.0,"carbs":38.0,"sodium":15},{"name":"大杯可乐","calories":210,"protein":0.0,"fat":0.0,"carbs":53.0,"sodium":20},{"name":"中杯雪碧","calories":145,"protein":0.0,"fat":0.0,"carbs":36.0,"sodium":20},{"name":"中杯芬达","calories":150,"protein":0.0,"fat":0.0,"carbs":38.0,"sodium":20},{"name":"中杯橙汁","calories":130,"protein":1.5,"fat":0.0,"carbs":31.0,"sodium":10},{"name":"美式咖啡(中杯)","calories":5,"protein":0.3,"fat":0.0,"carbs":1.0,"sodium":5},{"name":"中杯拿铁","calories":110,"protein":6.0,"fat":5.0,"carbs":10.0,"sodium":75},{"name":"卡布奇诺","calories":95,"protein":5.0,"fat":4.5,"carbs":9.0,"sodium":65},{"name":"焦糖玛奇朵","calories":200,"protein":6.0,"fat":5.0,"carbs":33.0,"sodium":95},{"name":"摩卡","calories":210,"protein":6.0,"fat":6.0,"carbs":32.0,"sodium":100},{"name":"热巧克力","calories":190,"protein":6.0,"fat":6.0,"carbs":28.0,"sodium":110},{"name":"中杯冰红茶","calories":90,"protein":0.0,"fat":0.0,"carbs":23.0,"sodium":10},{"name":"矿泉水","calories":0,"protein":0.0,"fat":0.0,"carbs":0.0,"sodium":0},{"name":"豆浆","calories":110,"protein":5.0,"fat":3.5,"carbs":14.0,"sodium":30},{"name":"原味甜筒","calories":150,"protein":3.5,"fat":4.5,"carbs":24.0,"sodium":70},{"name":"奥利奥麦旋风","calories":300,"protein":5.0,"fat":10.0,"carbs":48.0,"sodium":160},{"name":"草莓麦旋风","calories":290,"protein":4.5,"fat":9.0,"carbs":47.0,"sodium":130},{"name":"新地(巧克力)","calories":280,"protein":4.5,"fat":8.5,"carbs":45.0,"sodium":120},{"name":"新地(草莓)","calories":270,"protein":4.5,"fat":8.0,"carbs":44.0,"sodium":115},{"name":"香草冰淇淋","calories":200,"protein":4.0,"fat":7.0,"carbs":29.0,"sodium":85},{"name":"芝士蛋糕","calories":320,"protein":6.0,"fat":20.0,"carbs":28.0,"sodium":260},{"name":"提拉米苏","calories":300,"protein":5.5,"fat":17.0,"carbs":30.0,"sodium":120},{"name":"猪柳蛋麦满分","calories":480,"protein":21.0,"fat":31.0,"carbs":30.0,"sodium":830},{"name":"猪柳麦满分","calories":400,"protein":17.0,"fat":26.0,"carbs":27.0,"sodium":740},{"name":"烟肉蛋麦满分","calories":450,"protein":21.0,"fat":28.0,"carbs":29.0,"sodium":1050},{"name":"吉士蛋麦满分","calories":310,"protein":17.0,"fat":14.0,"carbs":29.0,"sodium":680},{"name":"热香饼","calories":320,"protein":6.0,"fat":9.0,"carbs":52.0,"sodium":480},{"name":"早餐全餐","calories":620,"protein":26.0,"fat":38.0,"carbs":42.0,"sodium":1200},{"name":"油条","calories":230,"protein":4.0,"fat":13.0,"carbs":24.0,"sodium":330},{"name":"脆薯饼","calories":150,"protein":1.5,"fat":8.0,"carbs":18.0,"sodium":310},{"name":"火腿扒麦满分","calories":380,"protein":20.0,"fat":17.0,"carbs":36.0,"sodium":950},{"name":"双层安格斯厚牛堡","calories":700,"protein":38.0,"fat":38.0,"carbs":45.0,"sodium":1300},{"name":"麦辣鸡腿","calories":290,"protein":18.0,"fat":18.0,"carbs":14.0,"sodium":640},{"name":"苹果派","calories":250,"protein":3.0,"fat":12.0,"carbs":34.0,"sodium":150},{"name":"冰拿铁","calories":100,"protein":6.0,"fat":5.0,"carbs":9.0,"sodium":70},{"name":"香草拿铁","calories":160,"protein":6.0,"fat":5.0,"carbs":23.0,"sodium":90},{"name":"抹茶拿铁","calories":170,"protein":6.0,"fat":5.0,"carbs":25.0,"sodium":90},{"name":"麦咖啡可颂","calories":250,"protein":5.0,"fat":13.0,"carbs":27.0,"sodium":380},{"name":"巧克力曲奇","calories":170,"protein":2.0,"fat":8.0,"carbs":22.0,"sodium":110}]};
+
+const DIMS = ["sweet","salty","spicy","sour","bitter","umami"];
+const DIM_CN = {sweet:"甜",salty:"咸",spicy:"辣",sour:"酸",bitter:"苦",umami:"鲜"};
+const CAT_CN = {burger:"汉堡",side:"小食",drink:"饮品",dessert:"甜品",breakfast:"早餐"};
+const TEMP_CN = {hot:"热",cold:"冰",room:"常温"};
+const MAXS = 5;
+
+/* 口味词表（与 Python 版 FLAVOR_KEYWORDS 对应） */
+const FLAVOR_KW = {
+  sweet:{甜:5,嗜甜:5,甜品:4,sweet:5,甜口:5},
+  salty:{咸:5,重口:5,咸香:4,salty:4},
+  spicy:{辣:5,香辣:4,麻辣:5,spicy:4,重辣:5},
+  sour:{酸:5,开胃:3,sour:4},
+  bitter:{苦:5,bitter:4},
+  umami:{鲜:4,肉香:4,umami:4}
+};
+const TEXTURE_KW = {酥脆:"酥脆",脆:"酥脆",软:"软嫩",嫩:"软嫩",多汁:"多汁",爆汁:"多汁",
+  绵密:"绵密",奶昔:"绵密",细腻:"绵密",爽脆:"爽脆",清脆:"爽脆",嚼劲:"有嚼劲"};
+const MEAT_TERMS = {
+  "牛肉":["牛","安格斯"],"猪肉":["猪柳","培根","烟肉","火腿"],
+  "鱼":["鱼"],"咖啡":["咖啡","拿铁","卡布","摩卡","玛奇朵","美式"],"鸡肉":["鸡"]
+};
+const NEGS = ["不要","不吃","不想吃","别吃","忌","过敏"];
+const TEMP_KW = {热:"hot",暖:"hot",冰:"cold",冷:"cold",凉:"cold",常温:"room"};
+const CAT_INTENT = {
+  burger:["汉堡","堡","巨无霸","双吉","安格斯"],
+  side:["小食","配菜","薯条","鸡块","鸡翅","鸡排","派","玉米"],
+  drink:["饮料","喝的","饮品","可乐","雪碧","芬达","咖啡","橙汁"],
+  dessert:["甜点","甜品","冰淇淋","甜筒","圣代","麦旋风","蛋糕"],
+  breakfast:["早餐","麦满分","油条","香饼"]
+};
+
+/* ===================================================================
+   工具
+   =================================================================== */
+const norm = s => String(s||"").trim().toLowerCase().replace(/[\s()（）　]/g,"");
+
+function find(name){
+  const k = norm(name);
+  for (const it of LIB.items){
+    if (norm(it.name)===k) return it;
+    for (const a of (it.aliases||[])) if (norm(a)===k) return it;
+  }
+  return null;
+}
+function priceOf(name){
+  const k = norm(name);
+  for (const it of PRICES.items) if (norm(it.name)===k) return it.price;
+  return null;
+}
+function nutriOf(name){
+  const k = norm(name);
+  for (const it of NUTRI.items) if (norm(it.name)===k) return it;
+  return null;
+}
+
+/* ===================================================================
+   画像构建
+   =================================================================== */
+function profileFromText(text){
+  const p = {target:{}, weights:{}, texture:[], temp:null, exclude:[], source:"text"};
+  DIMS.forEach(d => { p.target[d]=0; p.weights[d]=0.15; });
+
+  for (const d in FLAVOR_KW){
+    for (const kw in FLAVOR_KW[d]){
+      if (text.includes(kw)){
+        const i = text.indexOf(kw);
+        const head = text.slice(Math.max(0,i-2), i);
+        const neg = NEGS.some(n => head.endsWith(n));
+        if (neg){ p.weights[d]=2.0; p.target[d]=0; p.exclude.push(DIM_CN[d]); }
+        else { p.weights[d]=2.0; p.target[d]=Math.max(p.target[d], FLAVOR_KW[d][kw]); }
+        break;
+      }
+    }
+  }
+  for (const kw in TEXTURE_KW){
+    const t = TEXTURE_KW[kw];
+    if (text.includes(kw) && !p.texture.includes(t)) p.texture.push(t);
+  }
+  for (const label in MEAT_TERMS){
+    let hit=false;
+    for (const tk of [label,...MEAT_TERMS[label]]){
+      if (NEGS.some(n => text.includes(n+tk))){ hit=true; break; }
+    }
+    if (hit && !p.exclude.includes(label)) p.exclude.push(label);
+  }
+  for (const kw in TEMP_KW){ if (text.includes(kw)){ p.temp=TEMP_KW[kw]; break; } }
+  if (["清淡","不腻","少油","轻食","健康"].some(w => text.includes(w))){
+    DIMS.forEach(d => { p.target[d]=Math.min(p.target[d],2.0); p.weights[d]=1.5; });
+  }
+  return p;
+}
+function profileFromAnchor(name){
+  const a = find(name);
+  if (!a) return null;
+  const p = {target:{}, weights:{}, texture:[...(a.texture||[])], temp:a.temp,
+             exclude:[], source:"anchor", note:a.name};
+  DIMS.forEach(d => { p.target[d]=a.flavor[d]||0; p.weights[d]=1.5; });
+  return p;
+}
+function describe(p){
+  if (p.source==="anchor") return "以「"+p.note+"」为口味基准";
+  const want = p.source==="text"
+    ? DIMS.filter(d => p.weights[d]>=1.5)
+    : DIMS.slice();
+  const parts=[];
+  want.forEach(d=>{
+    const t=p.target[d];
+    if (t>=3.5) parts.push("偏"+DIM_CN[d]);
+    else if (t<=1.5 && p.weights[d]>=1.5) parts.push("要少"+DIM_CN[d]);
+  });
+  if (p.texture.length) parts.push("爱"+p.texture.join("、"));
+  if (p.temp) parts.push({hot:"要热的",cold:"要冰的",room:"常温"}[p.temp]);
+  if (p.exclude.length) parts.push("排除"+p.exclude.join("、"));
+  return parts.length?parts.join("、"):"无明显偏好（按均衡推荐）";
+}
+
+/* ===================================================================
+   相似度与检索
+   =================================================================== */
+function excluded(it, p){
+  const name = it.name;
+  for (const kw of p.exclude){
+    for (const d in DIM_CN){
+      if (kw===DIM_CN[d] && (it.flavor[d]||0)>=3) return true;
+    }
+    if (kw==="牛肉" && (name.includes("牛")||name.includes("安格斯"))) return true;
+    if (kw==="猪肉" && ["猪柳","培根","烟肉","火腿"].some(x=>name.includes(x))) return true;
+    if (kw==="鱼" && name.includes("鱼")) return true;
+    if (kw==="鸡肉" && (name.includes("鸡")||name.includes("翅"))) return true;
+  }
+  if (p.temp && it.temp!==p.temp) return true;
+  return false;
+}
+function similarity(it, p){
+  let num=0, den=0;
+  DIMS.forEach(d=>{
+    const w=p.weights[d]||0;
+    if (w<=0.1) return;
+    num += w*(1-Math.abs((p.target[d]||0)-(it.flavor[d]||0))/MAXS);
+    den += w;
+  });
+  const base = den? num/den : 0;
+  let tex=0; const reasons=[];
+  (it.texture||[]).forEach(t=>{ if (p.texture.includes(t)){ tex+=0.05;
+    reasons.push("口感「"+t+"」符合你的偏好"); } });
+  tex = Math.min(tex,0.10);
+  let tmp=0;
+  if (p.temp && it.temp===p.temp){ tmp=0.05; reasons.push("温度符合"); }
+  DIMS.slice().sort((a,b)=>{
+    const sa=p.weights[a]*(1-Math.abs((p.target[a]||0)-(it.flavor[a]||0))/MAXS);
+    const sb=p.weights[b]*(1-Math.abs((p.target[b]||0)-(it.flavor[b]||0))/MAXS);
+    return sb-sa;
+  }).slice(0,2).forEach(d=>{
+    if ((p.weights[d]||0)>1.5 && Math.abs((p.target[d]||0)-(it.flavor[d]||0))<=1)
+      reasons.unshift(DIM_CN[d]+"度对得上（你 "+(p.target[d]||0).toFixed(1)+
+                      " / 它 "+(it.flavor[d]||0).toFixed(1)+"）");
+  });
+  return {score:Math.min(base*0.85+tex+tmp,1), reasons};
+}
+function recommend(p, topK, excludeNames){
+  const ex = new Set((excludeNames||[]).map(norm));
+  const out=[];
+  for (const it of LIB.items){
+    if (ex.has(norm(it.name))) continue;
+    if (excluded(it,p)) continue;
+    const r = similarity(it,p);
+    out.push({item:it, score:r.score, reasons:r.reasons});
+  }
+  out.sort((a,b)=>b.score-a.score);
+  return out.slice(0, topK||5);
+}
+
+/* ===================================================================
+   组合 × 券 联合求解
+   =================================================================== */
+const CENTS = x => Math.round(x*100);
+function couponOff(cp, names, sub){
+  if (cp.kind==="threshold") return sub>=CENTS(cp.threshold)? Math.min(CENTS(cp.amount),sub):0;
+  if (cp.kind==="item"){
+    for (const n of names) if (n===cp.targetName)
+      return Math.min(CENTS(cp.amount), CENTS(priceOf(n)||0));
+    return 0;
+  }
+  if (cp.kind==="discount"){
+    let off = Math.round(sub*(1-cp.rate));
+    if (cp.maxOff!=null) off=Math.min(off,CENTS(cp.maxOff));
+    return Math.max(off,0);
+  }
+  return 0;
+}
+function combos(pool, budget){
+  const items = pool.filter(n=>priceOf(n)!=null);
+  // 候选池本身覆盖几个品类：用于判断"要不要跨品类"
+  const cats = new Set(items.map(n=>{ const i=find(n); return i?i.category:null; }).filter(Boolean));
+  const needCross = cats.size >= 2;
+  let best=null;
+  const n = items.length;
+  for (let m=1; m<(1<<n); m++){
+    const names=[];
+    for (let i=0;i<n;i++) if (m&(1<<i)) names.push(items[i]);
+    // 一餐至少两样，最多三样 —— 只给一份鸡块不算一餐
+    if (names.length<2 || names.length>3) continue;
+
+    const sub = names.reduce((a,x)=>a+CENTS(priceOf(x)),0);
+    let cp=null, bestOff=0;
+    for (const c of PRICES.coupons){
+      const o=couponOff(c,names,sub);
+      if (o>bestOff){ bestOff=o; cp=c; }
+    }
+    const paid = Math.max(sub-bestOff,0);
+    if (budget!=null && paid>CENTS(budget)) continue;
+
+    // 若池子里有多种品类，组合就必须跨品类 ——
+    // 否则"最省"会选出两份同类的小食凑数，不像一餐。
+    if (needCross){
+      const got = new Set(names.map(x=>{ const i=find(x); return i?i.category:null; }).filter(Boolean));
+      if (got.size < 2) continue;
+    }
+    // 同分时优先"含主食"的组合
+    const hasMain = names.some(x=>{ const i=find(x); return i && i.category==="burger"; });
+    const score = paid - (hasMain?1:0);   // 微小偏好，不改变"更省优先"的大方向
+    if (!best || score<best._s){
+      best={names,sub,off:bestOff,paid,cp,_s:score};
+    }
+  }
+  if (best) delete best._s;
+  return best;
+}
+
+/* ===================================================================
+   UI
+   =================================================================== */
+let MODE="want", LAST=null;
+const $ = id => document.getElementById(id);
+
+const CHIPS = {
+  want:["想吃甜的，要酥脆的","想吃辣的","清淡一点，不要油炸","想吃甜的，不要牛肉","想来点带咖啡味的"],
+  like:["巨无霸","麦辣鸡腿汉堡","中薯条","奥利奥麦旋风","芝士蛋糕"],
+  surprise:["给我个惊喜","随便，要热的"]
+};
+function renderChips(){
+  $("chips").innerHTML = CHIPS[MODE].map(c=>'<span class="chip">'+c+'</span>').join("");
+  $("chips").querySelectorAll(".chip").forEach(el=>{
+    el.onclick = ()=>{
+      if (MODE==="surprise"){ $("q").value=""; doSurprise(); }
+      else { $("q").value = el.textContent; run(); }
+    };
+  });
+}
+document.querySelectorAll(".tab").forEach(t=>{
+  t.onclick = ()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+    t.classList.add("on");
+    MODE = t.dataset.mode;
+    $("q").placeholder = MODE==="like" ? "输入一个你爱吃的餐品名，例如：巨无霸"
+                       : MODE==="surprise" ? "点下面的标签，或直接按「推荐」"
+                       : "例如：想吃甜的，要酥脆的，不要牛肉";
+    $("q").value="";
+    renderChips();
+    $("resultSec").style.display="none";
+  };
+});
+
+const catTag = it => (CAT_CN[it.category]||it.category)+"·"+(TEMP_CN[it.temp]||it.temp);
+
+function cardHTML(r,i){
+  const it=r.item;
+  const bars = DIMS.filter(d=>(it.flavor[d]||0)>0).map(d=>
+    '<div class="bar"><span class="lb">'+DIM_CN[d]+'</span>'+
+    '<span class="track"><span class="fill" style="width:'+((it.flavor[d]/5)*100)+'%"></span></span>'+
+    '<span>'+it.flavor[d]+'</span></div>').join("");
+  const why = r.reasons.slice(0,3).map(x=>"<div>"+x+"</div>").join("");
+  return '<div class="card">'+
+    '<div class="card-top"><span class="rank">'+(i+1)+'</span>'+
+    '<span class="name">'+it.name+'</span>'+
+    '<span class="cat">'+catTag(it)+'</span>'+
+    '<span class="score">'+Math.round(r.score*100)+'%</span></div>'+
+    '<div class="bars">'+bars+'</div>'+
+    (it.texture&&it.texture.length?'<div class="tex">口感：'+it.texture.join("、")+'</div>':"")+
+    (why?'<div class="why">'+why+'</div>':"")+
+    '<div class="ev"><b>配料依据：</b>'+it.evidence+'</div>'+
+  '</div>';
+}
+
+function show(p, title, excludeNames){
+  const recs = recommend(p, 5, excludeNames);
+  LAST = p;
+  $("resultSec").style.display="block";
+  $("profile").innerHTML = '<div class="profile">'+title+'<br><b>你的口味画像：</b>'+describe(p)+'</div>';
+  $("cards").innerHTML = recs.length
+    ? recs.map(cardHTML).join("")
+    : '<div class="empty">没有符合的餐品。可能排除条件过严（例如同时要求「要冰的」和「要热的」），放宽试试。</div>';
+  $("comboOut").innerHTML="";
+  $("resultSec").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function run(){
+  const v = $("q").value.trim();
+  if (MODE==="like"){
+    if (!v){ alert("请输入一个餐品名，例如：巨无霸"); return; }
+    const a = find(v);
+    if (!a){ alert("口味图谱里没有「"+v+"」\n可以在下方【口味图谱】里找一个存在的名字。"); return; }
+    show(profileFromAnchor(a.name), '找相似的 · 基准是「'+a.name+'」', [a.name]);
+  } else if (MODE==="surprise"){
+    doSurprise();
+  } else {
+    if (!v){ alert("说一句你想吃什么味，例如：想吃甜的，要酥脆的"); return; }
+    show(profileFromText(v), '按口味描述 · 原文「'+v+'」');
+  }
+}
+function doSurprise(){
+  const pool = ["想吃甜的","想吃辣的","想清淡点","想来点咸香的","想吃冰的甜品","想吃酥脆的"];
+  const t = pool[Math.floor(Math.random()*pool.length)];
+  $("q").value = t;
+  show(profileFromText(t), "随便给你一个 · 抽到「"+t+"」");
+}
+$("run").onclick = run;
+$("q").addEventListener("keydown", e=>{ if(e.key==="Enter") run(); });
+
+$("combo").onclick = ()=>{
+  if (!LAST){ alert("先在上面做一次推荐"); return; }
+  const b = parseFloat($("budget").value);
+  const pool = recommend(LAST, 8).map(r=>r.item.name);
+  const best = combos(pool, isNaN(b)?null:b);
+  if (!best){
+    $("comboOut").innerHTML = '<div class="empty">这个预算下没凑出组合。'+
+      '把预算调高几块试试。</div>';
+    return;
+  }
+  let lines="";
+  best.names.forEach(n=>{ lines += '<div class="combo-line"><span>'+n+
+    '</span><span>¥'+(priceOf(n)).toFixed(2)+'</span></div>'; });
+
+  let nut="", missing=[];
+  const tot={calories:0,protein:0,fat:0,carbs:0,sodium:0};
+  const has={calories:false,protein:false,fat:false,carbs:false,sodium:false};
+  best.names.forEach(n=>{
+    const nu = nutriOf(n);
+    if (!nu){ missing.push(n); return; }
+    ["calories","protein","fat","carbs","sodium"].forEach(k=>{
+      if (nu[k]==null) return;
+      tot[k]+=nu[k]; has[k]=true;
+    });
+  });
+  const f=(k,dec)=> has[k]? tot[k].toFixed(dec) : '<span class="none">无</span>';
+  nut = "热量 "+f("calories",0)+" kcal ｜ 蛋白质 "+f("protein",1)+" g ｜ 脂肪 "+
+        f("fat",1)+" g ｜ 碳水 "+f("carbs",1)+" g ｜ 钠 "+f("sodium",0)+" mg";
+  if (missing.length) nut += '<br><span class="none">⚠️ 以下餐品无营养数据（计为「无」，未计入总和）：'+
+    missing.join("、")+'</span>';
+
+  $("comboOut").innerHTML = '<div class="combo">'+lines+
+    '<div class="combo-total"><div>实付 <span class="pay">¥'+(
+      best.paid/100).toFixed(2)+'</span></div>'+
+    '<div class="save">原价 ¥'+(best.sub/100).toFixed(2)+
+      (best.off>0? ' ｜ 用「'+best.cp.name+'」省 ¥'+(best.off/100).toFixed(2) : ' ｜ 无可用券')+
+    '</div></div>'+
+    '<div class="nut">'+nut+'</div></div>';
+};
+
+/* 图谱 */
+(function(){
+  const order=["burger","side","drink","dessert","breakfast"];
+  let h="";
+  order.forEach(c=>{
+    const g = LIB.items.filter(i=>i.category===c);
+    if (!g.length) return;
+    h += '<div style="margin:16px 0 7px;font-weight:800;color:#002060;font-size:15px">'+
+         (CAT_CN[c]||c)+'（'+g.length+' 款）</div>';
+    g.forEach(it=>{
+      const fl = DIMS.filter(d=>(it.flavor[d]||0)>0)
+        .map(d=>DIM_CN[d]+it.flavor[d]).join(" ");
+      h += '<div class="mrow"><span class="mname" title="'+it.name+'">'+it.name+
+           '</span><span class="mfl">'+(fl||"—")+'</span></div>';
+    });
+  });
+  $("mapBody").innerHTML = h;
+  $("mapBody").querySelectorAll(".mname").forEach(el=>{
+    el.style.cursor="pointer";
+    el.onclick = ()=>{
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+      document.querySelector('.tab[data-mode="like"]').classList.add("on");
+      MODE="like"; $("q").value=el.textContent; renderChips(); run();
+    };
+  });
+})();
+
+renderChips();
+/* 首次进入自动跑一个示例，避免空白页 */
+$("q").value = "想吃甜的，要酥脆的，不要牛肉";
+run();
+</script>
+</body>
+</html>
