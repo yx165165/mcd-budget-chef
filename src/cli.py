@@ -40,6 +40,10 @@ from nutrition import (  # noqa: E402
     NutritionGoal, NutritionTable, format_totals, summarize,
 )
 from coupon_optimizer import PriceOptimizer, PriceTable  # noqa: E402
+from allergen import (  # noqa: E402
+    ALLERGENS, ALLERGEN_CN, CONFIRMED, POSSIBLE, UNKNOWN, LEVEL_CN,
+    AllergenEngine, format_report,
+)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -58,6 +62,59 @@ CATEGORY_INTENT: Dict[str, tuple] = {
     "dessert": ("甜点", "甜品", "冰淇淋", "甜筒", "圣代", "麦旋风", "蛋糕"),
     "breakfast": ("早餐", "麦满分", "油条", "香饼"),
 }
+
+# 过敏原口语说法 → 内部 key。用户说「我鸡蛋过敏」时自动叠加硬过滤。
+ALLERGEN_SPOKEN: Dict[str, str] = {
+    "麸质": "gluten", "面筋": "gluten", "小麦": "gluten",
+    "牛奶": "milk", "乳制品": "milk", "乳糖": "milk", "奶": "milk", "乳": "milk",
+    "鸡蛋": "egg", "蛋类": "egg", "蛋": "egg",
+    "大豆": "soy", "黄豆": "soy",
+    "鱼类": "fish", "鱼": "fish",
+    "虾": "crustacean", "蟹": "crustacean", "甲壳": "crustacean",
+    "花生": "peanut",
+    "坚果": "tree_nut", "果仁": "tree_nut",
+    "芝麻": "sesame",
+    "芥末": "mustard",
+}
+
+# 触发过敏原识别的语境词
+ALLERGY_CUES = ["过敏", "不耐受", "不能吃", "忌", "避开", "避开含"]
+
+
+def detect_allergens(text: str) -> List[str]:
+    """从自然语言里识别用户要避开的过敏原。
+
+    只在**过敏语境内**才识别——避免「想吃有蛋的汉堡」被误判成要避开蛋。
+    语境窗口取触发词的**前后各 14 字**，因为中文里语序不定：
+      「我鸡蛋过敏」→ 过敏原在触发词之前
+      「避开含蛋的」→ 过敏原在触发词之后
+    """
+    out: List[str] = []
+    seen_cue = False
+    for cue in ALLERGY_CUES:
+        idx = 0
+        while True:
+            p = text.find(cue, idx)
+            if p < 0:
+                break
+            seen_cue = True
+            lo = max(0, p - 14)
+            hi = min(len(text), p + len(cue) + 14)
+            seg = text[lo:hi]
+            for word, key in ALLERGEN_SPOKEN.items():
+                if word in seg and key not in out:
+                    out.append(key)
+            idx = p + len(cue)
+
+    # 「不要蛋」「别放牛奶」这类未带「过敏」字样的说法也支持
+    for word, key in ALLERGEN_SPOKEN.items():
+        if key in out:
+            continue
+        for neg in ("不要", "不吃", "别放", "不加", "忌"):
+            if f"{neg}{word}" in text or f"{neg}含{word}" in text:
+                out.append(key)
+                break
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -181,6 +238,79 @@ def cmd_compare(args) -> int:
                   + "、".join(c["name"] for c in cands[:3]))
     print()
     return 0
+
+
+def cmd_allergen(args) -> int:
+    """查询单个餐品的过敏原参考，或按过敏原筛菜单。"""
+    eng = AllergenEngine.load(args.library)
+
+    # 模式 A：筛菜单（给了 --avoid）
+    if args.avoid:
+        avoid = [a.strip() for a in args.avoid.replace("，", ",").split(",") if a.strip()]
+        # 支持中文名与英文 key 两种写法
+        key_map = {a["cn"]: a["key"] for a in ALLERGENS}
+        keys, bad = [], []
+        for a in avoid:
+            if a in key_map:
+                keys.append(key_map[a])
+            elif a in ALLERGEN_CN:
+                keys.append(a)
+            else:
+                bad.append(a)
+        if bad:
+            print(f"[错误] 无法识别的过敏原：{'、'.join(bad)}", file=sys.stderr)
+            print(f"可选：{'、'.join(key_map.keys())}", file=sys.stderr)
+            return 2
+
+        pool = [r.name for r in FlavorRecommender(FlavorLibrary.load(args.library))
+                .recommend(profile_from_text(args.want or ""), top_k=args.pool)] if args.want else None
+        safe, risk, unknown = eng.filter_safe(keys, pool)
+
+        names = "、".join(key_map_inv(k) for k in keys)
+        print("=" * 66)
+        print(f"  按过敏原筛选：避开「{names}」")
+        print("=" * 66)
+        print()
+        print(f"  ✅ 配料描述中未发现（{len(safe)} 款）")
+        print(f"     {'、'.join(safe) if safe else '（无）'}")
+        print()
+        print(f"  🔴 含 或 🟡 可能含（{len(risk)} 款）")
+        print(f"     {'、'.join(risk) if risk else '（无）'}")
+        print()
+        if unknown:
+            print(f"  ⚪ 无配料描述、无法判断（{len(unknown)} 款）")
+            print(f"     {'、'.join(unknown)}")
+            print()
+        print("-" * 66)
+        print("  ⚠️ 「未发现」**不等于「不含」**：本判定基于公开配料信息推导，")
+        print("     非麦当劳中国大陆官方数据；且厨房共线加工，无法排除交叉污染。")
+        print("     严重过敏请以下单时麦当劳官方说明为准，并咨询医生。")
+        if args.json:
+            print()
+            print(json.dumps({
+                "avoid": keys, "safe": safe, "risk": risk, "unknown": unknown,
+            }, ensure_ascii=False, indent=2))
+        return 0
+
+    # 模式 B：查单个餐品
+    if not args.item:
+        print("[错误] 请指定餐品名，或用 --avoid 按过敏原筛菜单。", file=sys.stderr)
+        return 2
+
+    rep = eng.analyze(args.item)
+    if rep is None:
+        print(f"[错误] 口味库里没有「{args.item}」。可用 `flavors` 查看全部餐品。", file=sys.stderr)
+        return 2
+
+    print(format_report(rep))
+    if args.json:
+        print()
+        print(json.dumps(rep.as_dict(), ensure_ascii=False, indent=2))
+    return 0
+
+
+def key_map_inv(k: str) -> str:
+    return ALLERGEN_CN.get(k, k)
 
 
 def cmd_flavors(args) -> int:
@@ -395,6 +525,13 @@ def cmd_simple(args) -> int:
             kcal = float(m.group(1))
 
     print(f"  → 口味画像：{p.describe()}")
+
+    # 识别过敏原 → 自动叠加硬过滤
+    avoid = detect_allergens(text)
+    if avoid:
+        names = "、".join(ALLERGEN_CN[k] for k in avoid if k in ALLERGEN_CN)
+        print(f"  → ⚠️ 检测到过敏原要求：避开「{names}」（将按配料推导过滤）")
+
     print(f"  → 预算：{'¥%.0f' % budget if budget else '不限'}"
           f"｜热量上限：{'%.0f kcal' % kcal if kcal else '不限'}")
     print()
@@ -404,6 +541,59 @@ def cmd_simple(args) -> int:
     if not cands:
         print("没听懂想吃什么。换个说法试试，比如「来个辣的汉堡，预算 30」。")
         return 1
+
+    # 过敏原硬过滤：从候选池里剔除「含」或「可能含」的餐品。
+    # 注意：这是**推导结果**，会明确告知用户依据与不确定性。
+    excluded_conf: List[str] = []     # 明确含
+    excluded_poss: List[str] = []     # 可能含（来自复合酱料等模糊配料）
+    excluded_nodata: List[str] = []   # 无配料数据，无法判断
+    if avoid:
+        eng = AllergenEngine.load(args.library)
+        kept = []
+        for c in cands:
+            rep = eng.analyze(c.name)
+            if rep is None:
+                kept.append(c)
+                continue
+            conf = [k for k in avoid if rep.levels.get(k) == CONFIRMED]
+            poss = [k for k in avoid if rep.levels.get(k) == POSSIBLE]
+            if conf:
+                excluded_conf.append(f"{c.name}（{'、'.join(ALLERGEN_CN[k] for k in conf)}）")
+            elif poss:
+                excluded_poss.append(f"{c.name}（{'、'.join(ALLERGEN_CN[k] for k in poss)}）")
+            elif not rep.has_ingredient_text:
+                # 无配料数据 → 无法判断，出于安全剔除并单独说明
+                excluded_nodata.append(c.name)
+            else:
+                kept.append(c)
+
+        if excluded_conf:
+            print(f"  → 🔴 剔除 {len(excluded_conf)} 款（配料中**明确含**）：")
+            for x in excluded_conf:
+                print(f"       · {x}")
+        if excluded_poss:
+            print(f"  → 🟡 剔除 {len(excluded_poss)} 款（复合酱料**可能含**，无法确认）：")
+            for x in excluded_poss:
+                print(f"       · {x}")
+        if excluded_nodata:
+            print(f"  → ❔ 剔除 {len(excluded_nodata)} 款（无配料数据，无法判断）：")
+            print(f"       · {'、'.join(excluded_nodata)}")
+        if excluded_conf or excluded_poss or excluded_nodata:
+            print()
+
+        cands = kept
+        if not cands:
+            print("⚠️ 按过敏原过滤后没有剩余候选。")
+            if excluded_poss:
+                print(f"   其中 {len(excluded_poss)} 款是**因为复合酱料无法确认**而被剔除的——")
+                print("   这些餐品本身可能并不含该过敏原，但国内酱料配方不公开。")
+                print("   建议：① 直接向麦当劳门店确认酱料成分；")
+                print("         ② 或换一个不同口味的说法再试（如「想吃清淡的」）。")
+            else:
+                print("   建议：换个口味的说法再试。")
+            print()
+            print("   提醒：本过滤基于配料推导，**非官方过敏原数据**，不可作为唯一依据。")
+            return 1
 
     # 品类意图：「辣的汉堡」里的「汉堡」必须被满足，
     # 否则「最省」会把主食换成更便宜的小食，点出来不像一餐。
@@ -434,8 +624,18 @@ def cmd_simple(args) -> int:
     )
 
     if not results:
-        print("这个预算下没凑出合适的一餐。")
-        print("建议：把预算提高几块，或者换个主食品类。")
+        # 给出**符合实际原因**的建议，不要一律说"提高预算"
+        if avoid:
+            print("这个条件下没凑出合适的一餐——主因是过敏原过滤后候选不足。")
+            print(f"（过敏原过滤后只剩 {len(cands)} 款候选）")
+            print("建议：① 换个口味的说法、扩大候选范围；")
+            print("      ② 或直接向麦当劳门店确认具体餐品的酱料成分。")
+        elif kcal:
+            print("这个预算下没凑出满足热量上限的一餐。")
+            print("建议：放宽热量上限，或提高预算。")
+        else:
+            print("这个预算下没凑出合适的一餐。")
+            print("建议：把预算提高几块，或者换个主食品类。")
         return 1
 
     res = results[0]
@@ -482,6 +682,14 @@ def main(argv=None) -> int:
     p5.add_argument("a", help="餐品 A 名称")
     p5.add_argument("b", help="餐品 B 名称")
     p5.set_defaults(func=cmd_compare)
+
+    p6 = sub.add_parser("allergen", parents=[common],
+                        help="过敏原参考：查单品 或 按过敏原筛菜单")
+    p6.add_argument("item", nargs="?", help="餐品名（查单品时填写）")
+    p6.add_argument("--avoid", help="要避开的过敏原，逗号分隔，如「蛋类,乳及乳制品」")
+    p6.add_argument("--want", help="配合 --avoid 使用：只在口味推荐结果里筛")
+    p6.add_argument("--pool", type=int, default=12)
+    p6.set_defaults(func=cmd_allergen)
 
     p2 = sub.add_parser("recommend", parents=[common], help="口味推荐（主功能）")
     p2.add_argument("--like", help="以某餐品为基准，找相似的")

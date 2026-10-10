@@ -30,7 +30,7 @@ def load(name: str) -> dict:
         return json.load(f)
 
 
-HTML_TEMPLATE = """<!DOCTYPE html>
+HTML_TEMPLATE = r"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -229,6 +229,38 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   @media(max-width:540px){
     .diffrow{grid-template-columns:1fr 60px 60px 76px;font-size:13px;padding:8px 10px}
   }
+
+  /* ---------- 过敏原 ---------- */
+  .allgWarn{
+    background:#fff8e6;border:1.5px solid #f0d089;border-radius:10px;
+    padding:13px 16px;font-size:13.5px;line-height:1.75;color:#6b4f0a;margin-bottom:16px;
+  }
+  .allgWarn b{color:#8a5a00}
+  .allgTbl{margin-top:16px;border:1.5px solid var(--line);border-radius:11px;overflow:hidden}
+  .allgRow{display:grid;grid-template-columns:1fr 110px 1fr;gap:10px;padding:9px 14px;
+           font-size:14px;border-bottom:1px solid var(--line);align-items:center}
+  .allgRow:last-child{border-bottom:none}
+  .allgRow.head{background:var(--bg-2);font-weight:700;color:var(--navy);font-size:13px}
+  .lv{font-weight:700;font-size:13.5px;white-space:nowrap}
+  .lv.c1{color:#b3261e}   /* confirmed */
+  .lv.c2{color:#b06a00}   /* possible */
+  .lv.c3{color:#5a6270}   /* none found */
+  .lv.c4{color:#8b95a6}   /* no data */
+  .hits{color:#5a6270;font-size:13px;line-height:1.6;word-break:break-all}
+  .allgSrc{margin-top:14px;font-size:13.5px;color:var(--ink-2);padding:11px 14px;
+           background:var(--bg-2);border-radius:8px;line-height:1.7}
+  .allgSrc b{color:var(--navy)}
+  /* 窄屏：判定与食材分两行，避免第三列被挤断 */
+  @media(max-width:540px){
+    .allgRow{grid-template-columns:1fr auto;grid-template-areas:"n l" "h h";
+             gap:2px 10px;font-size:13.5px;padding:9px 12px}
+    .allgRow.head{display:none}
+    .allgRow .an{grid-area:n}
+    .allgRow .lv{grid-area:l;text-align:right}
+    .allgRow .hits{grid-area:h;padding-left:0;margin-top:2px;font-size:12.5px}
+    .allgRow .hits:empty{display:none}
+    .allgRow .hits:before{content:"触发：";color:#8b95a6}
+  }
 </style>
 </head>
 <body>
@@ -325,6 +357,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </div>
     <div class="chips" id="cmpChips"></div>
     <div id="cmpOut"></div>
+  </section>
+
+  <section>
+    <h2>过敏原参考</h2>
+    <div class="allgWarn">
+      <b>⚠️ 请先读这段</b><br>
+      中国大陆麦当劳<b>未公开过敏原一览表</b>。下面是<b>基于公开配料描述推导</b>的参考值，
+      <b>不是官方过敏原数据</b>。<br>
+      判定含义：<b>🔴 含</b> = 配料里明确写出；<b>🟡 可能含</b> = 配料里有含义模糊的复合酱料；
+      <b>⚪ 未发现</b> = 核对过配料、未提及；<b>❔ 无数据</b> = 该餐品无配料描述。
+      <b>⚪ 和 ❔ 都不等于「不含」</b>。<br>
+      麦当劳厨房同时处理多种致敏食材，<b>无法保证任何餐品完全不含过敏原</b>。
+      严重过敏请<b>以下单时麦当劳官方说明为准，并咨询医生</b>。
+    </div>
+    <div class="row">
+      <input type="text" id="allgItem" placeholder="查单个餐品，例如：巨无霸">
+      <button class="go" id="allgBtn">查询</button>
+    </div>
+    <div class="chips" id="allgChips"></div>
+    <div id="allgOut"></div>
   </section>
 
   <section>
@@ -590,6 +642,143 @@ function combos(pool, budget){
 /* ===================================================================
    UI
    =================================================================== */
+/* ===================================================================
+   过敏原推导（与 Python 版 src/allergen.py 同一套规则）
+   ⚠️ 这是**基于配料描述的推导**，不是官方过敏原数据。
+   =================================================================== */
+const ALLERGENS = [
+  {key:"gluten",     cn:"含麸质谷物"},
+  {key:"milk",       cn:"乳及乳制品"},
+  {key:"egg",        cn:"蛋类"},
+  {key:"soy",        cn:"大豆"},
+  {key:"fish",       cn:"鱼类"},
+  {key:"crustacean", cn:"甲壳纲类"},
+  {key:"peanut",     cn:"花生"},
+  {key:"tree_nut",   cn:"坚果"},
+  {key:"sesame",     cn:"芝麻"},
+  {key:"mustard",    cn:"芥末"},
+];
+const ING_MAP = {
+  gluten:["面包","面包糠","英式松饼","松饼","面饼","面粉","小麦","麦片","裹粉","脆浆",
+          "酥皮","派皮","华夫筒","曲奇","饼干","可颂","热香饼","油条","麦满分","汉堡",
+          "堡","卷","蛋糕","司康","贝果","泡芙"],
+  milk:["芝士","奶酪","干酪","切达","高达","牛奶","奶油","黄油","鲜奶","乳酪","奶泡",
+        "奶盖","冰淇淋","甜筒","新地","圣代","麦旋风","拿铁","卡布","玛奇朵","摩卡",
+        "奶茶","热巧克力","奶昔","芝士蛋糕","提拉米苏","奶油奶酪","马斯卡彭"],
+  egg:["鸡蛋","蛋饼","蒸蛋","炒蛋","煎蛋","蛋堡","蛋","蛋黄酱","美乃滋","塔塔酱","蛋白","欧姆蛋"],
+  soy:["大豆","豆油","酱油","豆浆","豆腐","植物调和油","沙拉油"],
+  fish:["鱼肉","鳕鱼","鲑鱼","三文鱼","金枪鱼","狭鳕","鱼排","鱼"],
+  crustacean:["虾","蟹","龙虾"],
+  peanut:["花生","花生酱"],
+  tree_nut:["榛果","杏仁","核桃","腰果","开心果","碧根果","夏威夷果","坚果"],
+  sesame:["芝麻"],
+  mustard:["芥末","黄芥末","第戎"],
+};
+// 复合酱料：命名不统一，用「…酱 / 沙拉」后缀匹配，一律只判「可能含」
+const AMBIG_PATTERNS = [
+  ["egg",     /[\u4e00-\u9fa5]{0,4}酱|沙拉/g],
+  ["mustard", /[\u4e00-\u9fa5]{0,4}酱|沙拉/g],
+  ["soy",     /[\u4e00-\u9fa5]{0,4}酱|沙拉|调味料|调味|裹粉|浆料/g],
+  ["milk",    /[\u4e00-\u9fa5]{0,4}酱|奶香|奶酪风味/g],
+  ["gluten",  /[\u4e00-\u9fa5]{0,4}酱|浆料/g],
+  ["sesame",  /[\u4e00-\u9fa5]{0,4}酱|沙拉|浆料/g],
+];
+const SAUCE_EXC = {egg:["番茄酱"]};
+
+const ING_MARKERS = ["主要原料为","主要原料：","配料：","配料:","原料：",
+                     "官网产品信息：","官网产品信息:","官网原文","官网热点更新",
+                     "麦当劳台湾官网原文：","麦当劳台湾官网原文:"];
+const REF_RE = /^\s*同\s*([^，,。；;]+)[，,。；;]/;
+
+function ingredientPart(ev){
+  // 整段参与扫描，只剔除我们后来追加的说明文字。
+  // 不截到第一句 —— 「麦乐鸡」的「裹粉」在第二句，截断会漏报含麸质。
+  return String(ev||"")
+    .replace(/〔官方对照〕[^。]*。?/g,"")
+    .replace(/依据《[^》]*》[：:]?/g,"")
+    .trim();
+}
+function hasIngredientText(t){
+  // 判断是否真的含配料信息，而非只是口味评论。
+  // 例：「燕麦奶替代牛奶」提到「牛奶」但是比较对象，不是配料声明。
+  if (!t) return false;
+  if (ING_MARKERS.some(m=>t.indexOf(m)>=0)) return true;
+  let hits=0;
+  for (const ak in ING_MAP){
+    for (const kw of ING_MAP[ak]){ if (t.indexOf(kw)>=0){ hits++; break; } }
+  }
+  return hits>=2;
+}
+function deriveAllergen(item, depth){
+  depth = depth||0;
+  const ev = String(item.evidence||"");
+  let ing = ingredientPart(ev);
+  const hasIng = hasIngredientText(ing);
+  let followedFrom = null;
+
+  if (!hasIng && depth<3){
+    const m = REF_RE.exec(ev.trim());
+    if (m){
+      const refName = m[1].trim();
+      let ref = find(refName);
+      if (!ref){ // 模糊找
+        for (const it of LIB.items) if (refName && it.name.indexOf(refName)>=0){ ref=it; break; }
+      }
+      if (ref){
+        const sub = deriveAllergen(ref, depth+1);
+        if (sub.ingredientFound){
+          // 复用被引用条目判定
+          const levels={}, hits={};
+          ALLERGENS.forEach(a=>{
+            levels[a.key]=sub.levels[a.key];
+            hits[a.key]=(sub.hits[a.key]||[]).map(h=>h+"（同「"+ref.name+"」）");
+          });
+          return {levels, hits, ingredientFound:true, followedFrom:ref.name,
+                  ambiguous:sub.ambiguous};
+        }
+      }
+    }
+  }
+
+  const levels={}, hits={};
+  ALLERGENS.forEach(a=>{ levels[a.key]="unknown"; hits[a.key]=[]; });
+
+  if (hasIng){
+    for (const ak in ING_MAP){
+      for (const kw of ING_MAP[ak]){
+        if (ing.indexOf(kw)>=0){
+          levels[ak]="confirmed";
+          if (hits[ak].indexOf(kw)<0) hits[ak].push(kw);
+        }
+      }
+    }
+    for (const [ak, re] of AMBIG_PATTERNS){
+      const found = ing.match(re) || [];
+      for (const kw of new Set(found)){
+        if ((SAUCE_EXC[ak]||[]).indexOf(kw)>=0) continue;
+        if (levels[ak]==="unknown") levels[ak]="possible";
+        if (hits[ak].indexOf(kw)<0) hits[ak].push(kw);
+      }
+    }
+  }
+
+  // 名称推断（仅咖啡奶类，标 possible）
+  const nm = item.name||"";
+  for (const kw of ["拿铁","卡布","玛奇朵","摩卡","奶茶","奶昔","热巧克力"]){
+    if (nm.indexOf(kw)>=0 && levels.milk==="unknown"){
+      levels.milk="possible";
+      hits.milk.push("产品名含「"+kw+"」，该类饮品通常含乳");
+      break;
+    }
+  }
+  if (/牛肉|鸡肉|猪肉|混合肉片/.test(ing) && levels.soy==="unknown"){
+    levels.soy="possible";
+    hits.soy.push("肉制品常含大豆蛋白作粘合剂（配方未公开）");
+  }
+
+  return {levels, hits, ingredientFound:hasIng, followedFrom, ambiguous:false};
+}
+
 let MODE="want", LAST=null;
 const $ = id => document.getElementById(id);
 
@@ -877,6 +1066,69 @@ $("cmpChips").querySelectorAll(".chip").forEach(el=>{
   };
 });
 
+/* ===================================================================
+   过敏原 UI
+   =================================================================== */
+function allergenHTML(name){
+  const it = find(name);
+  if (!it){ return '<div class="err">口味图谱里没有「'+name+'」</div>'; }
+  const r = deriveAllergen(it);
+
+  const srcMap = {
+    official_disclosure:"麦当劳中国官方公示文件（可信度最高）",
+    official_website:"麦当劳中国官网页面（可信度较高）",
+    inferred:"第三方/推断（仅供参考）"
+  };
+  const srcTxt = srcMap[it.source] || it.source;
+
+  let rows = '';
+  ALLERGENS.forEach(a=>{
+    const lv = r.levels[a.key];
+    const hit = (r.hits[a.key]||[]).join("、") || "—";
+    let cls, txt;
+    if (lv==="confirmed"){ cls="c1"; txt="🔴 含"; }
+    else if (lv==="possible"){ cls="c2"; txt="🟡 可能含"; }
+    else if (lv==="unknown" && !r.ingredientFound){ cls="c4"; txt="❔ 无数据"; }
+    else if (lv==="unknown"){ cls="c3"; txt="⚪ 未发现"; }
+    rows += '<div class="allgRow"><span class="an">'+a.cn+'</span>'+
+            '<span class="lv '+cls+'">'+txt+'</span>'+
+            '<span class="hits">'+(hit==="—"?"":hit)+'</span></div>';
+  });
+
+  const conf = ALLERGENS.filter(a=>r.levels[a.key]==="confirmed").map(a=>a.cn);
+  const poss = ALLERGENS.filter(a=>r.levels[a.key]==="possible").map(a=>a.cn);
+
+  let summary;
+  if (!r.ingredientFound){
+    summary = '<b>⚠️ 该餐品无配料描述，无法推导。</b>所有项均为「❔ 无数据」，这不等于「不含」。';
+  } else if (!conf.length && !poss.length){
+    summary = '<b>ℹ️ 已依据配料描述逐项核对，未发现八大类致敏物质。</b>但这不等于「绝对不含」。';
+  } else {
+    summary = '已识别：' + (conf.length?('<b>'+conf.join('、')+'</b>（明确含）'):'无明确含')
+            + (poss.length?('；<b>'+poss.join('、')+'</b>（可能含，来自复合酱料等模糊配料）'):'');
+  }
+
+  return '<div class="allgTbl">'+
+      '<div class="allgRow head"><span>过敏原</span><span>判定</span><span>触发食材</span></div>'+
+      rows + '</div>'+
+    '<div class="allgSrc">'+summary+'<br><b>配料依据来源：</b>'+srcTxt+
+      '<br><b>原始依据：</b>'+(it.evidence||'（无）')+'</div>';
+}
+function showAllergen(name){
+  $("allgOut").innerHTML = allergenHTML(name);
+}
+$("allgBtn").onclick = ()=>{
+  const v = $("allgItem").value.trim();
+  if (!v){ alert("输入一个餐品名，例如：巨无霸"); return; }
+  showAllergen(v);
+};
+$("allgItem").addEventListener("keydown", e=>{ if(e.key==="Enter") $("allgBtn").click(); });
+const ALLG_SAMPLES = ["巨无霸","麦香鱼","麦辣鸡腿汉堡","小薯条","奥利奥麦旋风","玉米杯"];
+$("allgChips").innerHTML = ALLG_SAMPLES.map(x=>'<span class="chip">'+x+'</span>').join("");
+$("allgChips").querySelectorAll(".chip").forEach(el=>{
+  el.onclick = ()=>{ $("allgItem").value=el.textContent; showAllergen(el.textContent); };
+});
+
 /* 图谱 */
 (function(){
   const order=["burger","side","drink","dessert","breakfast"];
@@ -907,6 +1159,7 @@ $("cmpChips").querySelectorAll(".chip").forEach(el=>{
 renderChips();
 drawStarMap();
 showCompare(CMP_PAIRS[0][0], CMP_PAIRS[0][1]);
+showAllergen("巨无霸");
 /* 首次进入自动跑一个示例，避免空白页 */
 $("q").value = "想吃甜的，要酥脆的，不要牛肉";
 run();
