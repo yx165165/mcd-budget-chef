@@ -36,7 +36,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>麦麦口味推荐官 · 在线演示</title>
-<meta name="description" content="告诉它你想吃什么味，它从 67 款麦当劳餐品的口味图谱里帮你找。零 Token、打开即玩。">
+<meta name="description" content="告诉它你想吃什么味，它从 __COUNT__ 款麦当劳餐品的口味图谱里帮你找。零 Token、打开即玩。">
 <style>
   :root{
     --navy:#002060;
@@ -189,16 +189,56 @@ HTML_TEMPLATE = """<!DOCTYPE html>
        border-radius:9px;margin-top:14px}
   .empty{color:var(--ink-2);font-size:15px;padding:14px;background:var(--bg-2);
          border-radius:9px;margin-top:14px}
+
+  /* ---------- 星图 ---------- */
+  .axctl{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+  .axctl label{font-size:14px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+  .axctl select{
+    font-size:14px;padding:6px 10px;border-radius:7px;border:1.5px solid var(--line);
+    background:#fff;color:var(--ink);font-family:inherit;cursor:pointer;
+  }
+  .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin-left:auto}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+  #starMap{background:var(--bg-2);border-radius:11px;padding:10px;overflow:hidden}
+  #starMap svg{display:block;width:100%;height:auto}
+  .pt{cursor:pointer;transition:.12s}
+  .pt:hover{stroke:#002060;stroke-width:2.5}
+  .tip{margin-top:10px;font-size:14px;color:var(--ink-2);text-align:center;
+       padding:9px;background:var(--bg-2);border-radius:8px;min-height:20px}
+  .tip b{color:var(--navy)}
+
+  /* ---------- 对比 ---------- */
+  .cmpGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+  @media(max-width:540px){.cmpGrid{grid-template-columns:1fr}}
+  .cmpCard{border:1.5px solid var(--line);border-radius:11px;padding:13px;background:#fff}
+  .cmpCard h4{font-size:16px;color:var(--navy);margin-bottom:4px;font-weight:800}
+  .cmpCard .sub{font-size:13px;color:var(--ink-2);margin-bottom:8px}
+  .cmpCard svg{display:block;width:100%;height:auto}
+  .difftab{margin-top:18px;border:1.5px solid var(--line);border-radius:11px;overflow:hidden}
+  .diffrow{display:grid;grid-template-columns:1fr 90px 90px 110px;gap:8px;
+           padding:9px 14px;font-size:14px;border-bottom:1px solid var(--line);
+           align-items:center}
+  .diffrow:last-child{border-bottom:none}
+  .diffrow.head{background:var(--bg-2);font-weight:700;color:var(--navy);font-size:13px}
+  .diffrow .up{color:#1a7f4b;font-weight:700}
+  .diffrow .dn{color:#b3261e;font-weight:700}
+  .diffrow .same{color:var(--ink-2)}
+  .verdict{margin-top:14px;padding:13px 16px;border-radius:9px;background:#f2f8f4;
+           border-left:4px solid var(--ok);font-size:15px;line-height:1.7}
+  .verdict b{color:var(--navy)}
+  @media(max-width:540px){
+    .diffrow{grid-template-columns:1fr 60px 60px 76px;font-size:13px;padding:8px 10px}
+  }
 </style>
 </head>
 <body>
 <header>
   <div class="inner">
     <h1>麦麦<span class="accent">口味</span>推荐官</h1>
-    <p class="sub">告诉它你想吃什么味，它从 67 款麦当劳餐品的口味图谱里帮你找——
+    <p class="sub">告诉它你想吃什么味，它从 __COUNT__ 款麦当劳餐品的口味图谱里帮你找——
        再顺手把营养和优惠券都算好。</p>
     <div class="tagbar">
-      <span>零 Token</span><span>打开即玩</span><span>67 款口味图谱</span><span>每条附配料依据</span>
+      <span>零 Token</span><span>打开即玩</span><span>__COUNT__ 款口味图谱</span><span>每条附配料依据</span>
     </div>
     <div class="meta">麦当劳程序员创意开发大赛参赛作品 · 非麦当劳官方产品</div>
   </div>
@@ -239,7 +279,56 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </section>
 
   <section>
-    <h2>口味图谱（全部 67 款）</h2>
+    <h2>口味星图</h2>
+    <p class="hint">
+      把全部 __COUNT__ 款餐品画在一张图上：<b>横轴一个维度、纵轴一个维度</b>，
+      每个点是一款餐品，颜色代表品类。<b>点任意一个点</b>就能拿它当推荐基准。
+      坐标轴可以换，试试把纵轴换成「辣」看辣味区在哪。
+    </p>
+    <div class="axctl">
+      <label>横轴
+        <select id="axX">
+          <option value="sweet">甜</option>
+          <option value="salty">咸</option>
+          <option value="spicy">辣</option>
+          <option value="sour">酸</option>
+          <option value="bitter">苦</option>
+          <option value="umami">鲜</option>
+        </select>
+      </label>
+      <label>纵轴
+        <select id="axY">
+          <option value="salty">咸</option>
+          <option value="spicy">辣</option>
+          <option value="sweet">甜</option>
+          <option value="sour">酸</option>
+          <option value="bitter">苦</option>
+          <option value="umami">鲜</option>
+        </select>
+      </label>
+      <span class="legend" id="legend"></span>
+    </div>
+    <div id="starMap"></div>
+    <div id="starTip" class="tip">点一个点试试 →</div>
+  </section>
+
+  <section>
+    <h2>两款口味对比</h2>
+    <p class="hint">
+      选两款餐品，看它们的口味差在哪。<b>这比看两个数字有用</b>——
+      一眼就知道「换个什么能更甜但不更辣」。
+    </p>
+    <div class="row">
+      <input type="text" id="cmpA" placeholder="餐品 A，例如：巨无霸">
+      <input type="text" id="cmpB" placeholder="餐品 B，例如：麦辣鸡腿汉堡">
+      <button class="go" id="cmpBtn">对比</button>
+    </div>
+    <div class="chips" id="cmpChips"></div>
+    <div id="cmpOut"></div>
+  </section>
+
+  <section>
+    <h2>口味图谱（全部 __COUNT__ 款）</h2>
     <p class="hint">这是我给每款餐品标注的口味。每条都附配料依据，可逐条溯源。</p>
     <details class="map">
       <summary>展开查看 · 点击任意一行可拿它当推荐基准</summary>
@@ -585,6 +674,11 @@ function doSurprise(){
   $("q").value = t;
   show(profileFromText(t), "随便给你一个 · 抽到「"+t+"」");
 }
+function goLike(name){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  document.querySelector('.tab[data-mode="like"]').classList.add("on");
+  MODE="like"; $("q").value=name; renderChips(); run();
+}
 $("run").onclick = run;
 $("q").addEventListener("keydown", e=>{ if(e.key==="Enter") run(); });
 
@@ -628,6 +722,161 @@ $("combo").onclick = ()=>{
     '<div class="nut">'+nut+'</div></div>';
 };
 
+/* ===================================================================
+   口味星图（散点）
+   =================================================================== */
+const CAT_COLOR = {
+  burger:"#1b3b7a", side:"#c98a00", drink:"#1a7f4b",
+  dessert:"#8e3fa8", breakfast:"#c0552b"
+};
+function drawStarMap(){
+  const xd = $("axX").value, yd = $("axY").value;
+  const W=680, H=430, P=62;
+  const pw=W-P-30, ph=H-P-34;
+  const sx = v => P + (v/5)*pw;
+  const sy = v => H-P - (v/5)*ph;
+
+  let s = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  // 网格
+  for(let i=0;i<=5;i++){
+    const gx=sx(i), gy=sy(i);
+    s+='<line x1="'+gx+'" y1="'+sy(0)+'" x2="'+gx+'" y2="'+sy(5)+'" stroke="#dfe5ee" stroke-width="1"/>';
+    s+='<line x1="'+sx(0)+'" y1="'+gy+'" x2="'+sx(5)+'" y2="'+gy+'" stroke="#dfe5ee" stroke-width="1"/>';
+    s+='<text x="'+gx+'" y="'+(sy(0)+18)+'" font-size="12" fill="#8b95a6" text-anchor="middle">'+i+'</text>';
+    s+='<text x="'+(sx(0)-10)+'" y="'+(gy+4)+'" font-size="12" fill="#8b95a6" text-anchor="end">'+i+'</text>';
+  }
+  // 轴名
+  const midY = sy(0) - ph/2;
+  s+='<text x="'+(sx(0)+pw/2)+'" y="'+(H-14)+'" font-size="14" font-weight="700" fill="#002060" text-anchor="middle">'+DIM_CN[xd]+'度 →</text>';
+  s+='<text x="18" y="'+midY+'" font-size="14" font-weight="700" fill="#002060" text-anchor="middle" '+
+     'transform="rotate(-90 18 '+midY+')">'+DIM_CN[yd]+'度 →</text>';
+  // 点
+  LIB.items.forEach((it,idx)=>{
+    const x=sx(it.flavor[xd]||0), y=sy(it.flavor[yd]||0);
+    const c=CAT_COLOR[it.category]||"#5a6270";
+    // 为避免完全重叠，用索引做微小抖动
+    const jx=((idx%7)-3)*1.8, jy=(((idx*3)%7)-3)*1.8;
+    s+='<circle class="pt" data-i="'+idx+'" cx="'+(x+jx).toFixed(1)+'" cy="'+(y+jy).toFixed(1)+
+       '" r="6.5" fill="'+c+'" fill-opacity="0.72" stroke="#fff" stroke-width="1.5"><title>'+
+       it.name+'：'+DIM_CN[xd]+it.flavor[xd]+' / '+DIM_CN[yd]+it.flavor[yd]+'</title></circle>';
+  });
+  s+='</svg>';
+  $("starMap").innerHTML = s;
+  $("starMap").querySelectorAll(".pt").forEach(el=>{
+    el.onclick = ()=>{
+      const it = LIB.items[+el.dataset.i];
+      $("starTip").innerHTML = '<b>'+it.name+'</b>　'+DIM_CN[xd]+it.flavor[xd]+' · '+DIM_CN[yd]+it.flavor[yd]+
+        '　（已设为推荐基准）';
+      goLike(it.name);
+    };
+  });
+  // 图例
+  $("legend").innerHTML = Object.keys(CAT_CN).map(k=>
+    '<span><i style="background:'+CAT_COLOR[k]+'"></i>'+CAT_CN[k]+'</span>').join("");
+}
+$("axX").onchange = drawStarMap;
+$("axY").onchange = drawStarMap;
+
+/* ===================================================================
+   两款口味对比（雷达图）
+   =================================================================== */
+function radarSVG(it, color){
+  const S=210, C=S/2, R=72;
+  const pt = (i,v)=>{
+    const a = -Math.PI/2 + i*(2*Math.PI/6);
+    const r = (v/5)*R;
+    return [C + r*Math.cos(a), C + r*Math.sin(a)];
+  };
+  let s='<svg viewBox="0 0 '+S+' '+S+'" xmlns="http://www.w3.org/2000/svg">';
+  // 环
+  [1,2,3,4,5].forEach(lv=>{
+    const pts = DIMS.map((_,i)=>pt(i,lv).map(x=>x.toFixed(1)).join(",")).join(" ");
+    s+='<polygon points="'+pts+'" fill="none" stroke="#e3e7ee" stroke-width="1"/>';
+  });
+  // 轴
+  DIMS.forEach((d,i)=>{
+    const [x,y]=pt(i,5);
+    s+='<line x1="'+C+'" y1="'+C+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#e3e7ee" stroke-width="1"/>';
+    const [lx,ly]=pt(i,5.85);
+    s+='<text x="'+lx.toFixed(1)+'" y="'+(ly+4).toFixed(1)+'" font-size="12.5" font-weight="700" fill="#5a6270" text-anchor="middle">'+DIM_CN[d]+'</text>';
+  });
+  // 数据多边形
+  const dpts = DIMS.map((d,i)=>pt(i, it.flavor[d]||0).map(x=>x.toFixed(1)).join(",")).join(" ");
+  s+='<polygon points="'+dpts+'" fill="'+color+'" fill-opacity="0.24" stroke="'+color+'" stroke-width="2.4"/>';
+  DIMS.forEach((d,i)=>{
+    const [x,y]=pt(i, it.flavor[d]||0);
+    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="3.6" fill="'+color+'"/>';
+  });
+  s+='</svg>';
+  return s;
+}
+function showCompare(aName,bName){
+  const A=find(aName), B=find(bName);
+  if(!A){ $("cmpOut").innerHTML='<div class="err">口味图谱里没有「'+aName+'」</div>'; return; }
+  if(!B){ $("cmpOut").innerHTML='<div class="err">口味图谱里没有「'+bName+'」</div>'; return; }
+  if(A.name===B.name){ $("cmpOut").innerHTML='<div class="err">请选两款不同的餐品</div>'; return; }
+
+  const rows = DIMS.map(d=>{
+    const va=A.flavor[d]||0, vb=B.flavor[d]||0, diff=vb-va;
+    const cls = diff>0?'up':(diff<0?'dn':'same');
+    const txt = diff>0?('+'+diff):(diff===0?'持平':String(diff));
+    return '<div class="diffrow"><span><b>'+DIM_CN[d]+'</b>度</span><span>'+va+'</span><span>'+vb+'</span><span class="'+cls+'">'+txt+'</span></div>';
+  }).join("");
+
+  // 找最大差异维度，生成一句人话结论
+  let maxD=DIMS[0], maxAbs=0;
+  DIMS.forEach(d=>{ const v=Math.abs((B.flavor[d]||0)-(A.flavor[d]||0)); if(v>maxAbs){maxAbs=v;maxD=d;} });
+  const dir = (B.flavor[maxD]||0) > (A.flavor[maxD]||0) ? '更' : '更少';
+  let verdict;
+  if(maxAbs===0){
+    verdict = '两款口味完全一致。';
+  } else {
+    const sameDims = DIMS.filter(d=>Math.abs((B.flavor[d]||0)-(A.flavor[d]||0))<=1).map(d=>DIM_CN[d]);
+    verdict = '最大差别在 <b>'+DIM_CN[maxD]+'度</b>：<b>'+B.name+'</b> 比 <b>'+A.name+'</b> '+dir+DIM_CN[maxD]+
+      '（'+ (B.flavor[maxD]||0) +' vs '+ (A.flavor[maxD]||0) +'，差 '+maxAbs+' 档）。';
+    if(sameDims.length) verdict += ' 两者在 <b>'+sameDims.join('、')+'</b> 上基本一致，'+
+      '所以这次替换'+ (maxAbs>=3?'会带来明显不同的风味体验':'差别比较细微') +'。';
+    // 给一条"要更X但不更Y"的建议
+    const cand = LIB.items.filter(it=>it.name!==A.name && it.name!==B.name
+      && (it.flavor[maxD]||0) > (A.flavor[maxD]||0)
+      && Math.abs((it.flavor[maxD==='sweet'?'spicy':'sweet']||0)-(A.flavor[maxD==='sweet'?'spicy':'sweet']||0))<=1);
+    if(cand.length){
+      verdict += '<br>想要「'+DIM_CN[maxD]+'更突出但不至于变味」的话，可以试试 <b>'+cand[0].name+'</b>。';
+    }
+  }
+
+  $("cmpOut").innerHTML =
+    '<div class="cmpGrid">'+
+      '<div class="cmpCard"><h4>'+A.name+'</h4><div class="sub">'+catTag(A)+' ｜ '+A.texture.join('、')+'</div>'+
+        radarSVG(A,'#1b3b7a')+'</div>'+
+      '<div class="cmpCard"><h4>'+B.name+'</h4><div class="sub">'+catTag(B)+' ｜ '+B.texture.join('、')+'</div>'+
+        radarSVG(B,'#c98a00')+'</div>'+
+    '</div>'+
+    '<div class="difftab"><div class="diffrow head"><span>维度</span><span>'+A.name.slice(0,5)+'</span>'+
+      '<span>'+B.name.slice(0,5)+'</span><span>差异</span></div>'+rows+'</div>'+
+    '<div class="verdict">'+verdict+'</div>';
+}
+$("cmpBtn").onclick = ()=>showCompare($("cmpA").value.trim(), $("cmpB").value.trim());
+[$("cmpA"),$("cmpB")].forEach(el=>el.addEventListener("keydown",e=>{
+  if(e.key==="Enter") $("cmpBtn").click(); }));
+const CMP_PAIRS = [
+  ["巨无霸","麦辣鸡腿汉堡"],
+  ["双层吉士汉堡","板烧鸡腿堡"],
+  ["奥利奥麦旋风","芝士蛋糕"],
+  ["中薯条","脆脆薯"],
+  ["美式咖啡(中杯)","燕麦拿铁"],
+  ["原味甜筒","玉米杯"]
+];
+$("cmpChips").innerHTML = CMP_PAIRS.map((p,i)=>
+  '<span class="chip" data-i="'+i+'">'+p[0]+' vs '+p[1]+'</span>').join("");
+$("cmpChips").querySelectorAll(".chip").forEach(el=>{
+  el.onclick = ()=>{
+    const p = CMP_PAIRS[+el.dataset.i];
+    $("cmpA").value=p[0]; $("cmpB").value=p[1];
+    showCompare(p[0],p[1]);
+  };
+});
+
 /* 图谱 */
 (function(){
   const order=["burger","side","drink","dessert","breakfast"];
@@ -656,6 +905,8 @@ $("combo").onclick = ()=>{
 })();
 
 renderChips();
+drawStarMap();
+showCompare(CMP_PAIRS[0][0], CMP_PAIRS[0][1]);
 /* 首次进入自动跑一个示例，避免空白页 */
 $("q").value = "想吃甜的，要酥脆的，不要牛肉";
 run();
@@ -671,6 +922,7 @@ def main() -> int:
     nutri = load("nutrition_demo.json")
 
     html = (HTML_TEMPLATE
+            .replace("__COUNT__", str(len(lib.get("items", []))))
             .replace("__LIB__", json.dumps(lib, ensure_ascii=False, separators=(",", ":")))
             .replace("__PRICES__", json.dumps(prices, ensure_ascii=False, separators=(",", ":")))
             .replace("__NUTRI__", json.dumps(nutri, ensure_ascii=False, separators=(",", ":"))))

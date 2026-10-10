@@ -2,85 +2,525 @@
   "_disclaimer": "【演示占位数据】以下价格与优惠券为离线演示用示例值，未与麦当劳官方实时菜单核验，仅用于在无 MCP Token 环境下跑通算法流程。真实运行时请通过麦当劳 MCP 的 query-meals / query-store-coupons / available-coupons 获取实时数据，并用 calculate-price 复核金额。",
   "_source": "MCP tools: query-meals, query-store-coupons, available-coupons, calculate-price",
   "items": [
-    {"name": "巨无霸", "price": 22.5},
-    {"name": "双层吉士汉堡", "price": 18.5},
-    {"name": "吉士汉堡", "price": 12.0},
-    {"name": "汉堡", "price": 11.0},
-    {"name": "麦辣鸡腿汉堡", "price": 20.0},
-    {"name": "板烧鸡腿堡", "price": 19.5},
-    {"name": "麦香鸡", "price": 13.0},
-    {"name": "麦香鱼", "price": 14.5},
-    {"name": "芝士安格斯厚牛堡", "price": 28.0},
-    {"name": "培根安格斯厚牛堡", "price": 30.0},
-    {"name": "白松露风味法式火腿安格斯厚牛堡", "price": 32.0},
-    {"name": "深海鳕鱼堡", "price": 17.0},
-    {"name": "大大鸡排堡", "price": 16.0},
-    {"name": "黑椒厚牛堡", "price": 25.0},
-
-    {"name": "小薯条", "price": 8.0},
-    {"name": "中薯条", "price": 10.5},
-    {"name": "大薯条", "price": 12.0},
-    {"name": "麦乐鸡(5块)", "price": 11.0},
-    {"name": "麦乐鸡(10块)", "price": 20.0},
-    {"name": "麦辣鸡翅(2块)", "price": 12.5},
-    {"name": "麦辣鸡翅(4块)", "price": 23.0},
-    {"name": "那么大鸡排", "price": 15.0},
-    {"name": "玉米杯", "price": 7.5},
-    {"name": "苹果片", "price": 6.0},
-    {"name": "香芋派", "price": 8.0},
-    {"name": "菠萝派", "price": 8.0},
-    {"name": "巧克力派", "price": 8.0},
-    {"name": "薯饼", "price": 7.0},
-
-    {"name": "中杯可乐", "price": 9.0},
-    {"name": "大杯可乐", "price": 10.5},
-    {"name": "中杯雪碧", "price": 9.0},
-    {"name": "中杯芬达", "price": 9.0},
-    {"name": "中杯橙汁", "price": 12.0},
-    {"name": "美式咖啡(中杯)", "price": 12.0},
-    {"name": "中杯拿铁", "price": 15.0},
-    {"name": "卡布奇诺", "price": 16.0},
-    {"name": "焦糖玛奇朵", "price": 18.0},
-    {"name": "摩卡", "price": 18.0},
-    {"name": "热巧克力", "price": 15.0},
-    {"name": "中杯冰红茶", "price": 10.0},
-    {"name": "矿泉水", "price": 6.0},
-    {"name": "豆浆", "price": 7.0},
-
-    {"name": "原味甜筒", "price": 4.0},
-    {"name": "奥利奥麦旋风", "price": 11.5},
-    {"name": "草莓麦旋风", "price": 11.5},
-    {"name": "新地(巧克力)", "price": 11.0},
-    {"name": "新地(草莓)", "price": 11.0},
-    {"name": "香草冰淇淋", "price": 10.0},
-    {"name": "芝士蛋糕", "price": 16.0},
-    {"name": "提拉米苏", "price": 18.0},
-
-    {"name": "猪柳蛋麦满分", "price": 16.0},
-    {"name": "猪柳麦满分", "price": 14.0},
-    {"name": "烟肉蛋麦满分", "price": 16.0},
-    {"name": "吉士蛋麦满分", "price": 14.0},
-    {"name": "热香饼", "price": 14.0},
-    {"name": "早餐全餐", "price": 25.0},
-    {"name": "油条", "price": 5.0},
-    {"name": "脆薯饼", "price": 7.0},
-    {"name": "火腿扒麦满分", "price": 15.0},
-
-    {"name": "双层安格斯厚牛堡", "price": 32.0},
-    {"name": "麦辣鸡腿", "price": 13.0},
-    {"name": "苹果派", "price": 7.0},
-    {"name": "冰拿铁", "price": 16.0},
-    {"name": "香草拿铁", "price": 17.0},
-    {"name": "抹茶拿铁", "price": 17.0},
-    {"name": "麦咖啡可颂", "price": 10.0},
-    {"name": "巧克力曲奇", "price": 6.0}
+    {
+      "name": "巨无霸",
+      "price": 22.5
+    },
+    {
+      "name": "双层吉士汉堡",
+      "price": 18.5
+    },
+    {
+      "name": "吉士汉堡",
+      "price": 12.0
+    },
+    {
+      "name": "汉堡",
+      "price": 11.0
+    },
+    {
+      "name": "麦辣鸡腿汉堡",
+      "price": 20.0
+    },
+    {
+      "name": "板烧鸡腿堡",
+      "price": 19.5
+    },
+    {
+      "name": "麦香鸡",
+      "price": 13.0
+    },
+    {
+      "name": "麦香鱼",
+      "price": 14.5
+    },
+    {
+      "name": "芝士安格斯厚牛堡",
+      "price": 28.0
+    },
+    {
+      "name": "培根安格斯厚牛堡",
+      "price": 30.0
+    },
+    {
+      "name": "白松露风味法式火腿安格斯厚牛堡",
+      "price": 32.0
+    },
+    {
+      "name": "深海鳕鱼堡",
+      "price": 17.0
+    },
+    {
+      "name": "大大鸡排堡",
+      "price": 16.0
+    },
+    {
+      "name": "黑椒厚牛堡",
+      "price": 25.0
+    },
+    {
+      "name": "小薯条",
+      "price": 8.0
+    },
+    {
+      "name": "中薯条",
+      "price": 10.5
+    },
+    {
+      "name": "大薯条",
+      "price": 12.0
+    },
+    {
+      "name": "麦乐鸡(5块)",
+      "price": 11.0
+    },
+    {
+      "name": "麦乐鸡(10块)",
+      "price": 20.0
+    },
+    {
+      "name": "麦辣鸡翅(2块)",
+      "price": 12.5
+    },
+    {
+      "name": "麦辣鸡翅(4块)",
+      "price": 23.0
+    },
+    {
+      "name": "那么大鸡排",
+      "price": 15.0
+    },
+    {
+      "name": "玉米杯",
+      "price": 7.5
+    },
+    {
+      "name": "苹果片",
+      "price": 6.0
+    },
+    {
+      "name": "香芋派",
+      "price": 8.0
+    },
+    {
+      "name": "菠萝派",
+      "price": 8.0
+    },
+    {
+      "name": "巧克力派",
+      "price": 8.0
+    },
+    {
+      "name": "薯饼",
+      "price": 7.0
+    },
+    {
+      "name": "中杯可乐",
+      "price": 9.0
+    },
+    {
+      "name": "大杯可乐",
+      "price": 10.5
+    },
+    {
+      "name": "中杯雪碧",
+      "price": 9.0
+    },
+    {
+      "name": "中杯芬达",
+      "price": 9.0
+    },
+    {
+      "name": "中杯橙汁",
+      "price": 12.0
+    },
+    {
+      "name": "美式咖啡(中杯)",
+      "price": 12.0
+    },
+    {
+      "name": "中杯拿铁",
+      "price": 15.0
+    },
+    {
+      "name": "卡布奇诺",
+      "price": 16.0
+    },
+    {
+      "name": "焦糖玛奇朵",
+      "price": 18.0
+    },
+    {
+      "name": "摩卡",
+      "price": 18.0
+    },
+    {
+      "name": "热巧克力",
+      "price": 15.0
+    },
+    {
+      "name": "中杯冰红茶",
+      "price": 10.0
+    },
+    {
+      "name": "矿泉水",
+      "price": 6.0
+    },
+    {
+      "name": "豆浆",
+      "price": 7.0
+    },
+    {
+      "name": "原味甜筒",
+      "price": 4.0
+    },
+    {
+      "name": "奥利奥麦旋风",
+      "price": 11.5
+    },
+    {
+      "name": "草莓麦旋风",
+      "price": 11.5
+    },
+    {
+      "name": "新地(巧克力)",
+      "price": 11.0
+    },
+    {
+      "name": "新地(草莓)",
+      "price": 11.0
+    },
+    {
+      "name": "香草冰淇淋",
+      "price": 10.0
+    },
+    {
+      "name": "芝士蛋糕",
+      "price": 16.0
+    },
+    {
+      "name": "提拉米苏",
+      "price": 18.0
+    },
+    {
+      "name": "猪柳蛋麦满分",
+      "price": 16.0
+    },
+    {
+      "name": "猪柳麦满分",
+      "price": 14.0
+    },
+    {
+      "name": "烟肉蛋麦满分",
+      "price": 16.0
+    },
+    {
+      "name": "吉士蛋麦满分",
+      "price": 14.0
+    },
+    {
+      "name": "热香饼",
+      "price": 14.0
+    },
+    {
+      "name": "早餐全餐",
+      "price": 25.0
+    },
+    {
+      "name": "油条",
+      "price": 5.0
+    },
+    {
+      "name": "脆薯饼",
+      "price": 7.0
+    },
+    {
+      "name": "火腿扒麦满分",
+      "price": 15.0
+    },
+    {
+      "name": "双层安格斯厚牛堡",
+      "price": 32.0
+    },
+    {
+      "name": "麦辣鸡腿",
+      "price": 13.0
+    },
+    {
+      "name": "苹果派",
+      "price": 7.0
+    },
+    {
+      "name": "冰拿铁",
+      "price": 16.0
+    },
+    {
+      "name": "香草拿铁",
+      "price": 17.0
+    },
+    {
+      "name": "抹茶拿铁",
+      "price": 17.0
+    },
+    {
+      "name": "麦咖啡可颂",
+      "price": 10.0
+    },
+    {
+      "name": "巧克力曲奇",
+      "price": 6.0
+    },
+    {
+      "name": "不素之霸双层牛肉堡",
+      "price": 26.0
+    },
+    {
+      "name": "培根蔬萃双层牛堡",
+      "price": 25.0
+    },
+    {
+      "name": "培根芝士双牛堡",
+      "price": 24.0
+    },
+    {
+      "name": "培根双层安格斯厚牛堡",
+      "price": 34.0
+    },
+    {
+      "name": "芝士双层安格斯厚牛堡",
+      "price": 33.0
+    },
+    {
+      "name": "浓浓高达芝士双层吉士汉堡",
+      "price": 23.0
+    },
+    {
+      "name": "咔滋咔滋脆鸡腿堡",
+      "price": 21.0
+    },
+    {
+      "name": "双层脆鸡堡",
+      "price": 20.0
+    },
+    {
+      "name": "飞碟鸡排堡",
+      "price": 17.0
+    },
+    {
+      "name": "双层深海鳕鱼堡",
+      "price": 24.0
+    },
+    {
+      "name": "德克萨斯风味四层肉霸",
+      "price": 35.0
+    },
+    {
+      "name": "麦麦脆汁鸡(鸡腿)",
+      "price": 14.0
+    },
+    {
+      "name": "麦麦脆汁鸡(鸡胸)",
+      "price": 14.0
+    },
+    {
+      "name": "薄皮焦香V翅",
+      "price": 13.5
+    },
+    {
+      "name": "红油奇香风味小酥肉",
+      "price": 13.0
+    },
+    {
+      "name": "蜜汁BBQ风味薄皮脆汁鸡",
+      "price": 14.5
+    },
+    {
+      "name": "酥酥多笋卷",
+      "price": 12.0
+    },
+    {
+      "name": "脆脆薯",
+      "price": 11.0
+    },
+    {
+      "name": "啊呜一口紫薯球",
+      "price": 9.5
+    },
+    {
+      "name": "脆薯格",
+      "price": 10.0
+    },
+    {
+      "name": "玉米汤",
+      "price": 9.0
+    },
+    {
+      "name": "四季沙拉",
+      "price": 13.0
+    },
+    {
+      "name": "水果袋",
+      "price": 8.0
+    },
+    {
+      "name": "大脆鸡扒麦满分",
+      "price": 17.0
+    },
+    {
+      "name": "原味板烧鸡腿麦满分",
+      "price": 16.0
+    },
+    {
+      "name": "双层原味板烧鸡腿麦满分",
+      "price": 20.0
+    },
+    {
+      "name": "吉士炒双蛋堡",
+      "price": 13.0
+    },
+    {
+      "name": "猪柳炒双蛋堡",
+      "price": 15.0
+    },
+    {
+      "name": "芝芝双吉蛋堡",
+      "price": 14.0
+    },
+    {
+      "name": "原味板烧鸡腿炒双蛋堡",
+      "price": 17.0
+    },
+    {
+      "name": "蜜瓜缤纷酷",
+      "price": 12.0
+    },
+    {
+      "name": "美汁源阳光橙",
+      "price": 11.0
+    },
+    {
+      "name": "麦炫酷阳光橙",
+      "price": 12.0
+    },
+    {
+      "name": "雪碧麦乐酷",
+      "price": 12.0
+    },
+    {
+      "name": "香芋缤纷酷",
+      "price": 12.0
+    },
+    {
+      "name": "摩卡缤纷酷",
+      "price": 14.0
+    },
+    {
+      "name": "柠檬红茶味饮料",
+      "price": 10.0
+    },
+    {
+      "name": "冰绿茶(无糖)",
+      "price": 8.0
+    },
+    {
+      "name": "热红茶",
+      "price": 8.0
+    },
+    {
+      "name": "零度可乐",
+      "price": 9.0
+    },
+    {
+      "name": "奶茶",
+      "price": 12.0
+    },
+    {
+      "name": "焦糖奶茶",
+      "price": 13.0
+    },
+    {
+      "name": "蜂蜜奶茶",
+      "price": 13.0
+    },
+    {
+      "name": "意式浓缩咖啡",
+      "price": 13.0
+    },
+    {
+      "name": "燕麦拿铁",
+      "price": 17.0
+    },
+    {
+      "name": "苹果汁",
+      "price": 11.0
+    },
+    {
+      "name": "鲜牛奶",
+      "price": 8.0
+    },
+    {
+      "name": "冰摩卡",
+      "price": 18.0
+    },
+    {
+      "name": "冰卡布奇诺",
+      "price": 16.0
+    },
+    {
+      "name": "缤纷圆筒冰淇淋",
+      "price": 5.0
+    },
+    {
+      "name": "双旋圆筒冰淇淋",
+      "price": 6.0
+    },
+    {
+      "name": "麦旋风(原味)",
+      "price": 10.5
+    }
   ],
   "coupons": [
-    {"code": "C001", "name": "满30减6", "kind": "threshold", "threshold": 30, "amount": 6},
-    {"code": "C002", "name": "满40减10", "kind": "threshold", "threshold": 40, "amount": 10},
-    {"code": "C003", "name": "满20减3", "kind": "threshold", "threshold": 20, "amount": 3},
-    {"code": "C004", "name": "巨无霸立减5元", "kind": "item", "targetName": "巨无霸", "amount": 5},
-    {"code": "C005", "name": "薯条立减3元", "kind": "item", "targetName": "中薯条", "amount": 3},
-    {"code": "C006", "name": "全场9折(封顶8元)", "kind": "discount", "rate": 0.9, "maxOff": 8}
+    {
+      "code": "C001",
+      "name": "满30减6",
+      "kind": "threshold",
+      "threshold": 30,
+      "amount": 6
+    },
+    {
+      "code": "C002",
+      "name": "满40减10",
+      "kind": "threshold",
+      "threshold": 40,
+      "amount": 10
+    },
+    {
+      "code": "C003",
+      "name": "满20减3",
+      "kind": "threshold",
+      "threshold": 20,
+      "amount": 3
+    },
+    {
+      "code": "C004",
+      "name": "巨无霸立减5元",
+      "kind": "item",
+      "targetName": "巨无霸",
+      "amount": 5
+    },
+    {
+      "code": "C005",
+      "name": "薯条立减3元",
+      "kind": "item",
+      "targetName": "中薯条",
+      "amount": 3
+    },
+    {
+      "code": "C006",
+      "name": "全场9折(封顶8元)",
+      "kind": "discount",
+      "rate": 0.9,
+      "maxOff": 8
+    }
   ]
 }

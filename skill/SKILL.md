@@ -85,6 +85,12 @@ python src/cli.py plan --want "<原话>" --budget 35 --kcal 700 --min-protein 25
 python src/cli.py simple "<原话>"
 ```
 
+用户想比较两款餐品的口味差异时（例如「巨无霸和麦辣鸡腿汉堡哪个更辣」）：
+
+```bash
+python src/cli.py compare "<餐品A>" "<餐品B>"
+```
+
 ### Step 4 · 券与金额复核（推荐）
 
 用 `query-store-coupons` / `available-coupons` / `query-my-coupons` 取券数据，

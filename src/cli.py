@@ -103,6 +103,86 @@ def print_recommendations(recs, profile, show_evidence: bool = False) -> None:
 # 子命令
 # ---------------------------------------------------------------------------
 
+def cmd_compare(args) -> int:
+    """两款口味对比：并排口味条 + 差异表 + 一句人话结论。"""
+    lib = FlavorLibrary.load(args.library)
+    A = lib.find(args.a)
+    B = lib.find(args.b)
+    if not A:
+        print(f"[错误] 口味库里没有「{args.a}」。可用 `flavors` 查看全部餐品。", file=sys.stderr)
+        return 2
+    if not B:
+        print(f"[错误] 口味库里没有「{args.b}」。", file=sys.stderr)
+        return 2
+    if A["name"] == B["name"]:
+        print("[错误] 请选两款不同的餐品。", file=sys.stderr)
+        return 2
+
+    print("=" * 66)
+    print(f"  口味对比：{A['name']}  vs  {B['name']}")
+    print("=" * 66)
+    print()
+
+    for it in (A, B):
+        cat = CATEGORY_CN.get(it.get("category", ""), it.get("category", ""))
+        temp = TEMP_CN.get(it.get("temp", ""), it.get("temp", ""))
+        print(f"【{it['name']}】{cat}·{temp}　口感：{'、'.join(it.get('texture', []))}")
+        for d in DIMENSIONS:
+            va = it.get("flavor", {}).get(d, 0)
+            print(f"    {DIM_CN[d]}  {bar(va)} {va}")
+        print(f"    依据：{it.get('evidence', '')}")
+        print()
+
+    # 差异表
+    print("-" * 66)
+    print(f"  {'维度':<6}{'A':>6}{'B':>8}{'差异':>10}   说明")
+    print("-" * 66)
+    for d in DIMENSIONS:
+        va = A.get("flavor", {}).get(d, 0)
+        vb = B.get("flavor", {}).get(d, 0)
+        diff = vb - va
+        mark = "↑" if diff > 0 else ("↓" if diff < 0 else "=")
+        note = ""
+        if diff > 0:
+            note = f"B 比 A 更{DIM_CN[d]}"
+        elif diff < 0:
+            note = f"B 比 A 少{DIM_CN[d]}"
+        print(f"  {DIM_CN[d]:<6}{va:>6}{vb:>8}{mark + str(abs(diff)):>10}   {note}")
+    print()
+
+    # 结论
+    max_d, max_abs = DIMENSIONS[0], 0
+    for d in DIMENSIONS:
+        v = abs(B.get("flavor", {}).get(d, 0) - A.get("flavor", {}).get(d, 0))
+        if v > max_abs:
+            max_d, max_abs = d, v
+
+    if max_abs == 0:
+        print("  ▸ 结论：两款口味完全一致。")
+    else:
+        dir_txt = "更" if B.get("flavor", {}).get(max_d, 0) > A.get("flavor", {}).get(max_d, 0) else "更少"
+        same = [DIM_CN[d] for d in DIMENSIONS
+                if abs(B.get("flavor", {}).get(d, 0) - A.get("flavor", {}).get(d, 0)) <= 1]
+        print(f"  ▸ 结论：最大差别在 {DIM_CN[max_d]}度 —— {B['name']} 比 {A['name']} {dir_txt}{DIM_CN[max_d]}"
+              f"（{B.get('flavor', {}).get(max_d, 0)} vs {A.get('flavor', {}).get(max_d, 0)}，差 {max_abs} 档）。")
+        if same:
+            print(f"     两者在 {'、'.join(same)} 上基本一致，"
+                  f"所以这次替换{'会带来明显不同的风味体验' if max_abs >= 3 else '差别比较细微'}。")
+
+        # 推荐"更 X 但不至于变味"的第三款
+        other = "spicy" if max_d == "sweet" else "sweet"
+        cands = [it for it in lib.items
+                 if it["name"] not in (A["name"], B["name"])
+                 and it.get("flavor", {}).get(max_d, 0) > A.get("flavor", {}).get(max_d, 0)
+                 and abs(it.get("flavor", {}).get(other, 0) - A.get("flavor", {}).get(other, 0)) <= 1]
+        if cands:
+            cands.sort(key=lambda x: -x.get("flavor", {}).get(max_d, 0))
+            print(f"     想要「{DIM_CN[max_d]}更突出但不至于变味」，可以试试："
+                  + "、".join(c["name"] for c in cands[:3]))
+    print()
+    return 0
+
+
 def cmd_flavors(args) -> int:
     lib = FlavorLibrary.load(args.library)
     items = lib.items
@@ -394,10 +474,14 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(
         description="麦麦口味推荐官 —— 按口味找吃的，顺便把营养和券都算好")
     sub = ap.add_subparsers(dest="cmd", required=True)
-
     p1 = sub.add_parser("flavors", parents=[common], help="查看口味图谱")
     p1.add_argument("--category", choices=list(CATEGORY_CN.keys()))
     p1.set_defaults(func=cmd_flavors)
+
+    p5 = sub.add_parser("compare", parents=[common], help="两款口味对比")
+    p5.add_argument("a", help="餐品 A 名称")
+    p5.add_argument("b", help="餐品 B 名称")
+    p5.set_defaults(func=cmd_compare)
 
     p2 = sub.add_parser("recommend", parents=[common], help="口味推荐（主功能）")
     p2.add_argument("--like", help="以某餐品为基准，找相似的")
