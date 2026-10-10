@@ -3,6 +3,10 @@
 > 麦当劳程序员创意开发大赛参赛作品
 > **按口味找吃的，顺便把营养和优惠券都算好。**
 
+### ▶️ [**点这里在线试用（零 Token、打开即玩）**](https://yx165165.github.io/mcd-flavor-scout/)
+
+不用安装、不用配置、不用申请 MCP Token，点开就能试。
+
 ---
 
 ## 一句话介绍
@@ -42,6 +46,9 @@ python src/cli.py recommend --history examples/history_sample.txt
 ```
 
 入口 C 的做法值得说明：它把历史订单里每款餐品的口味向量按**时间加权平均**（越近的订单权重越高），得出你的口味重心；同时按各维度的**方差**调整权重——你在某维度上点的越稳定，说明越挑，该维度权重越高。
+
+> 💡 想先看看跑起来什么样？直接打开[在线演示](https://yx165165.github.io/mcd-flavor-scout/)，
+> 它就是这套算法的浏览器版镜像（同一份数据、同一套评分公式）。
 
 ### ② 营养配餐
 
@@ -213,6 +220,10 @@ mcd-flavor-scout/
 │   ├── nutrition.py           # 营养配餐 + 缺失数据处理
 │   ├── coupon_optimizer.py    # 组合 × 券 联合优化
 │   └── cli.py                 # 四个子命令的入口
+├── tools/
+│   └── build_demo.py          # 生成零 Token 在线演示页
+├── docs/
+│   └── index.html             # 在线演示（GitHub Pages 托管）
 ├── data/
 │   ├── flavor_tags.json       # ★ 口味图谱（核心资产，含依据）
 │   ├── nutrition_demo.json    # 营养（演示占位）
