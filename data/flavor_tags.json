@@ -1,0 +1,624 @@
+{
+  "_meta": {
+    "name": "麦麦口味图谱 flavor_tags",
+    "version": "1.0.0",
+    "updated": "2026-10-10",
+    "disclaimer": "本口味标签为『基于公开配料信息的结构化推断』，非麦当劳官方数据。每条标签均附 evidence 字段记录推断依据，可逐条溯源。口味强度为 0-5 的相对刻度，用于同类菜品间的相对比较，不等同于绝对感官评测值。",
+    "flavor_dimensions": {
+      "sweet": "甜度（糖、酱料、乳制品带来的甜味）",
+      "salty": "咸度（盐、酱料、芝士、培根/火腿等腌制肉类）",
+      "spicy": "辣度（辣椒腌渍、辣味裹粉、辣酱）",
+      "sour": "酸度（番茄酱、芥末、泡菜、塔塔酱、柑橘、碳酸）",
+      "bitter": "苦度（咖啡、可可）",
+      "umami": "鲜味/肉香（牛肉、鸡肉、芝士、鱼、菌菇）"
+    },
+    "texture_vocab": ["酥脆", "软嫩", "多汁", "绵密", "爽脆", "有嚼劲", "颗粒感", "顺滑", "碳酸刺激感"],
+    "temp_vocab": ["hot", "cold", "room"],
+    "evidence_policy": "依据来源优先级：① 麦当劳官方渠道（官网产品页成分说明、官网热点更新、台湾官网产品信息、MCP 返回字段）；② 权威第三方词条（如百度百科对单品的配料描述）；③ 通用食品工艺常识。凡属推断而非官方直述者，均在 evidence 中标注『推断』。"
+  },
+  "items": [
+    {
+      "name": "巨无霸",
+      "aliases": ["Big Mac", "巨无霸汉堡"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 3, "salty": 4, "spicy": 0, "sour": 2, "bitter": 0, "umami": 4},
+      "texture": ["多汁", "软嫩", "爽脆"],
+      "evidence": "配料：芝麻面包 + 双层 100% 纯牛肉饼 + 生菜 + 切达芝士 + 酸黄瓜 + 洋葱 + 巨无霸酱。巨无霸酱为甜酸风味酱料（推断 甜3/酸2）；牛肉饼与芝士提供鲜味（鲜4）；生菜与酸黄瓜带来爽脆口感。"
+    },
+    {
+      "name": "双层吉士汉堡",
+      "aliases": ["Double Cheeseburger", "双吉", "双层芝士汉堡"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 2, "salty": 4, "spicy": 0, "sour": 2, "bitter": 0, "umami": 4},
+      "texture": ["多汁", "软嫩"],
+      "evidence": "配料：常规面包 + 双层 100% 牛肉饼 + 加工切达奶酪片 + 番茄酱 + 芥末 + 洋葱 + 泡菜片（第三方词条明确列出）。番茄酱偏甜（甜2）、芥末与泡菜偏酸（酸2）、牛肉+切达提供鲜味（鲜4）。"
+    },
+    {
+      "name": "吉士汉堡",
+      "aliases": ["Cheeseburger", "单层吉士汉堡"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 2, "salty": 4, "spicy": 0, "sour": 2, "bitter": 0, "umami": 3},
+      "texture": ["多汁", "软嫩"],
+      "evidence": "与双层吉士同配方但仅单层牛肉饼，故鲜味与饱口度低于双吉（鲜3），咸酸甜结构一致。"
+    },
+    {
+      "name": "汉堡",
+      "aliases": ["Hamburger", "牛肉汉堡"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 2, "salty": 3, "spicy": 0, "sour": 2, "bitter": 0, "umami": 3},
+      "texture": ["软嫩"],
+      "evidence": "配料：面包 + 单层牛肉饼 + 番茄酱 + 芥末 + 洋葱 + 酸黄瓜，无芝士。因缺芝士，咸度与鲜味均低于吉士汉堡各 1 档（推断）。"
+    },
+    {
+      "name": "麦辣鸡腿汉堡",
+      "aliases": ["麦辣鸡腿堡", "Spicy Chicken Burger"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 4, "spicy": 4, "sour": 1, "bitter": 0, "umami": 3},
+      "texture": ["酥脆", "多汁"],
+      "evidence": "配料：辣味腌渍鸡腿排（炸制）+ 生菜 + 沙拉酱。辣度来自辣椒腌渍与辣味裹粉，属该品牌辣度最高一档（辣4）；炸鸡外皮提供酥脆感。"
+    },
+    {
+      "name": "板烧鸡腿堡",
+      "aliases": ["Grilled Chicken Burger", "板烧鸡腿汉堡"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 2, "salty": 3, "spicy": 0, "sour": 0, "bitter": 0, "umami": 4},
+      "texture": ["多汁", "软嫩"],
+      "evidence": "配料：板烧（铁板煎制）鸡腿排 + 生菜 + 蛋黄酱。板烧腌渍汁含酱油与糖，呈轻微甜咸（甜2）；非油炸故口感偏多汁软嫩而非酥脆。"
+    },
+    {
+      "name": "麦香鸡",
+      "aliases": ["McChicken", "麦香鸡汉堡"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 3, "spicy": 0, "sour": 1, "bitter": 0, "umami": 3},
+      "texture": ["酥脆", "软嫩"],
+      "evidence": "配料：炸鸡排 + 生菜 + 蛋黄酱。配料结构简单，口味以咸鲜为主，无辣无甜味来源。"
+    },
+    {
+      "name": "麦香鱼",
+      "aliases": ["Filet-O-Fish", "麦香鱼汉堡"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 3, "spicy": 0, "sour": 2, "bitter": 0, "umami": 3},
+      "texture": ["酥脆", "软嫩"],
+      "evidence": "配料：方形鳕鱼排（面包糠裹粉炸）+ 塔塔酱 + 半片芝士 + 蒸制面包。塔塔酱含酸黄瓜碎，呈微酸甜（甜1/酸2）；蒸包质地显著偏软（软嫩）。"
+    },
+    {
+      "name": "芝士安格斯厚牛堡",
+      "aliases": ["安格斯厚牛堡", "Angus Cheeseburger"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 4, "spicy": 0, "sour": 1, "bitter": 0, "umami": 5},
+      "texture": ["多汁", "软嫩"],
+      "evidence": "配料：加大牛肉饼（安格斯）+ 芝士。官网热点更新说明安格斯系列牛肉饼均为纯安格斯牛肉、采用无油煎制工艺。牛肉含量高，鲜味（肉香）为全菜单最高档之一（鲜5）。"
+    },
+    {
+      "name": "培根安格斯厚牛堡",
+      "aliases": ["培根安格斯"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 5, "spicy": 0, "sour": 1, "bitter": 0, "umami": 5},
+      "texture": ["多汁", "酥脆"],
+      "evidence": "配料：安格斯牛肉饼 + 培根 + 芝士。官网热点更新明确『培根安格斯厚牛堡中的培根为猪肉』。培根属高盐腌制肉类，使咸度达到全菜单最高档（咸5）；煎脆培根提供酥脆感。"
+    },
+    {
+      "name": "白松露风味法式火腿安格斯厚牛堡",
+      "aliases": ["白松露安格斯", "法式火腿安格斯"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 5, "spicy": 0, "sour": 1, "bitter": 0, "umami": 5},
+      "texture": ["多汁", "软嫩"],
+      "evidence": "官网热点更新明确『白松露风味法式火腿安格斯厚牛堡中的法式火腿和培根为猪肉』『汉堡中添加为白松露制作的白松露风味酱汁』。火腿为高盐腌制品（咸5）；白松露风味酱汁带来独特菌菇香气（归入鲜味维度）。"
+    },
+    {
+      "name": "深海鳕鱼堡",
+      "aliases": ["鳕鱼堡"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 3, "spicy": 0, "sour": 2, "bitter": 0, "umami": 3},
+      "texture": ["酥脆", "软嫩"],
+      "evidence": "配料：裹粉炸鳕鱼排 + 酱料 + 生菜。鱼肉本身清淡，口味主要由塔塔类酱料与裹粉调味决定，结构与麦香鱼相近（推断）。"
+    },
+    {
+      "name": "大大鸡排堡",
+      "aliases": ["大鸡排堡"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 4, "spicy": 1, "sour": 1, "bitter": 0, "umami": 3},
+      "texture": ["酥脆", "多汁"],
+      "evidence": "配料：大块裹粉炸鸡排 + 生菜 + 酱料。裹粉调味含轻微黑胡椒，故辣度记 1（推断）。"
+    },
+    {
+      "name": "黑椒厚牛堡",
+      "aliases": ["黑椒牛肉堡"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 4, "spicy": 2, "sour": 1, "bitter": 0, "umami": 4},
+      "texture": ["多汁", "软嫩"],
+      "evidence": "配料：牛肉饼 + 黑胡椒酱。黑胡椒提供辛香刺激感，归入辣度维度记 2（非辣椒辣，属胡椒辛味，推断）。"
+    },
+    {
+      "name": "小薯条",
+      "aliases": ["薯条(小)"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 0, "salty": 4, "spicy": 0, "sour": 0, "bitter": 0, "umami": 2},
+      "texture": ["酥脆", "绵密"],
+      "evidence": "官网产品信息：马铃薯切条、以植物油高温炸制，表面撒盐。官网原文描述薯条品质为『外层金黄酥脆、内里绵密细致』，故 texture 同时含酥脆与绵密；咸味来自表面加盐（咸4）。"
+    },
+    {
+      "name": "中薯条",
+      "aliases": ["薯条(中)"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 0, "salty": 4, "spicy": 0, "sour": 0, "bitter": 0, "umami": 2},
+      "texture": ["酥脆", "绵密"],
+      "evidence": "同小薯条，仅份量不同。"
+    },
+    {
+      "name": "大薯条",
+      "aliases": ["薯条(大)"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 0, "salty": 4, "spicy": 0, "sour": 0, "bitter": 0, "umami": 2},
+      "texture": ["酥脆", "绵密"],
+      "evidence": "同小薯条，仅份量不同。"
+    },
+    {
+      "name": "麦乐鸡(5块)",
+      "aliases": ["麦乐鸡块", "鸡块5块", "McNuggets"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 3, "spicy": 1, "sour": 0, "bitter": 0, "umami": 3},
+      "texture": ["酥脆", "软嫩"],
+      "evidence": "麦当劳台湾官网原文：『鷄肉於調味裹層後，使用經過安全認證的進口植物油烹炸，成為口感微酥柔嫩』。裹粉调味含少量胡椒（辣1）。实际口味高度依赖蘸酱（酸甜酱/糖醋酱/芥末酱），此处仅记录鸡块本体。"
+    },
+    {
+      "name": "麦乐鸡(10块)",
+      "aliases": ["鸡块10块"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 3, "spicy": 1, "sour": 0, "bitter": 0, "umami": 3},
+      "texture": ["酥脆", "软嫩"],
+      "evidence": "同麦乐鸡(5块)，仅份量不同。"
+    },
+    {
+      "name": "麦辣鸡翅(2块)",
+      "aliases": ["麦辣鸡翅", "辣翅2块"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 0, "salty": 4, "spicy": 4, "sour": 0, "bitter": 0, "umami": 3},
+      "texture": ["酥脆", "多汁"],
+      "evidence": "配料：辣味腌渍鸡翅裹粉炸制。辣度与麦辣鸡腿汉堡同级（辣4）；炸制外皮酥脆、翅肉多汁。"
+    },
+    {
+      "name": "麦辣鸡翅(4块)",
+      "aliases": ["辣翅4块"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 0, "salty": 4, "spicy": 4, "sour": 0, "bitter": 0, "umami": 3},
+      "texture": ["酥脆", "多汁"],
+      "evidence": "同麦辣鸡翅(2块)，仅份量不同。"
+    },
+    {
+      "name": "那么大鸡排",
+      "aliases": ["大鸡排"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 4, "spicy": 2, "sour": 0, "bitter": 0, "umami": 3},
+      "texture": ["酥脆", "多汁"],
+      "evidence": "配料：大块裹粉炸鸡排。裹粉调味偏咸香，含轻微胡椒辛味（辣2，推断）。"
+    },
+    {
+      "name": "玉米杯",
+      "aliases": ["甜玉米杯"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 4, "salty": 0, "spicy": 0, "sour": 0, "bitter": 0, "umami": 1},
+      "texture": ["绵密", "颗粒感"],
+      "evidence": "配料：甜玉米粒。甜味为玉米本身天然甜（甜4），无额外调味。颗粒感来自玉米粒形态。"
+    },
+    {
+      "name": "苹果片",
+      "aliases": ["苹果切片"],
+      "category": "side",
+      "temp": "cold",
+      "flavor": {"sweet": 3, "salty": 0, "spicy": 0, "sour": 2, "bitter": 0, "umami": 0},
+      "texture": ["爽脆"],
+      "evidence": "配料：鲜切苹果。天然果糖（甜3）与苹果酸（酸2）并存，口感爽脆。"
+    },
+    {
+      "name": "香芋派",
+      "aliases": ["芋头派"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 5, "salty": 1, "spicy": 0, "sour": 0, "bitter": 0, "umami": 0},
+      "texture": ["酥脆", "绵密"],
+      "evidence": "配料：酥皮 + 香芋馅。酥皮炸制（酥脆），芋泥馅为高糖甜馅（甜5）。"
+    },
+    {
+      "name": "菠萝派",
+      "aliases": ["菠萝派(热)"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 5, "salty": 1, "spicy": 0, "sour": 2, "bitter": 0, "umami": 0},
+      "texture": ["酥脆", "绵密"],
+      "evidence": "配料：酥皮 + 菠萝果酱馅。菠萝含果酸，故甜中带酸（甜5/酸2）。"
+    },
+    {
+      "name": "巧克力派",
+      "aliases": [],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 5, "salty": 1, "spicy": 0, "sour": 0, "bitter": 1, "umami": 0},
+      "texture": ["酥脆", "绵密"],
+      "evidence": "配料：酥皮 + 巧克力馅。可可带来轻微苦感（苦1）。"
+    },
+    {
+      "name": "薯饼",
+      "aliases": ["hash brown"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 0, "salty": 3, "spicy": 0, "sour": 0, "bitter": 0, "umami": 1},
+      "texture": ["酥脆"],
+      "evidence": "配料：马铃薯丝压制成型后炸制。以酥脆为唯一主要质感，调味仅盐。"
+    },
+    {
+      "name": "中杯可乐",
+      "aliases": ["可口可乐", "可乐(中)"],
+      "category": "drink",
+      "temp": "cold",
+      "flavor": {"sweet": 5, "salty": 0, "spicy": 0, "sour": 2, "bitter": 0, "umami": 0},
+      "texture": ["碳酸刺激感"],
+      "evidence": "配料：碳酸水 + 糖 + 焦糖色 + 磷酸 + 咖啡因。磷酸与二氧化碳带来酸感与刺激感（酸2）；含糖量为全饮品最高档（甜5）。"
+    },
+    {
+      "name": "大杯可乐",
+      "aliases": ["可乐(大)"],
+      "category": "drink",
+      "temp": "cold",
+      "flavor": {"sweet": 5, "salty": 0, "spicy": 0, "sour": 2, "bitter": 0, "umami": 0},
+      "texture": ["碳酸刺激感"],
+      "evidence": "同中杯可乐，仅容量不同。"
+    },
+    {
+      "name": "中杯雪碧",
+      "aliases": ["雪碧"],
+      "category": "drink",
+      "temp": "cold",
+      "flavor": {"sweet": 5, "salty": 0, "spicy": 0, "sour": 3, "bitter": 0, "umami": 0},
+      "texture": ["碳酸刺激感"],
+      "evidence": "配料：碳酸水 + 糖 + 柠檬酸。柠檬酸使酸度高于可乐（酸3）；无焦糖色与磷酸，口味更清亮。"
+    },
+    {
+      "name": "中杯芬达",
+      "aliases": ["芬达", "橙味汽水"],
+      "category": "drink",
+      "temp": "cold",
+      "flavor": {"sweet": 5, "salty": 0, "spicy": 0, "sour": 2, "bitter": 0, "umami": 0},
+      "texture": ["碳酸刺激感"],
+      "evidence": "配料：碳酸水 + 糖 + 橙味香精。以甜味为主导（甜5），酸度中等。"
+    },
+    {
+      "name": "中杯橙汁",
+      "aliases": ["橙汁"],
+      "category": "drink",
+      "temp": "cold",
+      "flavor": {"sweet": 3, "salty": 0, "spicy": 0, "sour": 3, "bitter": 0, "umami": 0},
+      "texture": ["顺滑"],
+      "evidence": "配料：橙汁（浓缩还原）。天然果糖（甜3）与柠檬酸/抗坏血酸（酸3）平衡，酸甜比明显低于汽水类。"
+    },
+    {
+      "name": "美式咖啡(中杯)",
+      "aliases": ["美式咖啡", "热美式", "Americano"],
+      "category": "drink",
+      "temp": "hot",
+      "flavor": {"sweet": 0, "salty": 0, "spicy": 0, "sour": 1, "bitter": 5, "umami": 0},
+      "texture": ["顺滑"],
+      "evidence": "配料：浓缩咖啡 + 水。咖啡因与烘焙产物带来全饮品最高苦度（苦5）；咖啡本身含有机酸（酸1）；无糖无奶。"
+    },
+    {
+      "name": "中杯拿铁",
+      "aliases": ["拿铁", "Latte"],
+      "category": "drink",
+      "temp": "hot",
+      "flavor": {"sweet": 2, "salty": 0, "spicy": 0, "sour": 0, "bitter": 3, "umami": 1},
+      "texture": ["顺滑", "绵密"],
+      "evidence": "配料：浓缩咖啡 + 大量蒸奶。乳糖带来甜感（甜2），牛奶稀释咖啡苦味至中等（苦3）；奶泡提供绵密质感。"
+    },
+    {
+      "name": "卡布奇诺",
+      "aliases": ["Cappuccino", "卡布"],
+      "category": "drink",
+      "temp": "hot",
+      "flavor": {"sweet": 2, "salty": 0, "spicy": 0, "sour": 0, "bitter": 3, "umami": 1},
+      "texture": ["绵密", "顺滑"],
+      "evidence": "配料：浓缩咖啡 + 蒸奶 + 厚奶泡。与拿铁相近，但奶泡比例更高、咖啡味更突出，故苦度与拿铁同档而绵密度更高。"
+    },
+    {
+      "name": "焦糖玛奇朵",
+      "aliases": ["Caramel Macchiato"],
+      "category": "drink",
+      "temp": "hot",
+      "flavor": {"sweet": 4, "salty": 0, "spicy": 0, "sour": 0, "bitter": 3, "umami": 1},
+      "texture": ["顺滑", "绵密"],
+      "evidence": "配料：浓缩咖啡 + 蒸奶 + 香草糖浆 + 焦糖酱。焦糖与香草糖浆显著提升甜度（甜4），是咖啡类中偏甜的一款。"
+    },
+    {
+      "name": "摩卡",
+      "aliases": ["Mocha", "摩卡咖啡"],
+      "category": "drink",
+      "temp": "hot",
+      "flavor": {"sweet": 4, "salty": 0, "spicy": 0, "sour": 0, "bitter": 3, "umami": 1},
+      "texture": ["顺滑", "绵密"],
+      "evidence": "配料：浓缩咖啡 + 蒸奶 + 巧克力酱。巧克力兼具甜与微苦（甜4/苦3）。"
+    },
+    {
+      "name": "热巧克力",
+      "aliases": ["热可可"],
+      "category": "drink",
+      "temp": "hot",
+      "flavor": {"sweet": 5, "salty": 0, "spicy": 0, "sour": 0, "bitter": 2, "umami": 1},
+      "texture": ["顺滑", "绵密"],
+      "evidence": "配料：可可粉 + 牛奶 + 糖。以甜为主（甜5），可可带轻微苦味（苦2）。"
+    },
+    {
+      "name": "中杯冰红茶",
+      "aliases": ["冰红茶"],
+      "category": "drink",
+      "temp": "cold",
+      "flavor": {"sweet": 3, "salty": 0, "spicy": 0, "sour": 1, "bitter": 1, "umami": 0},
+      "texture": ["顺滑"],
+      "evidence": "配料：红茶 + 糖 + 柠檬。茶多酚带来轻涩苦感（苦1），含糖故甜（甜3）。"
+    },
+    {
+      "name": "矿泉水",
+      "aliases": ["瓶装水"],
+      "category": "drink",
+      "temp": "room",
+      "flavor": {"sweet": 0, "salty": 0, "spicy": 0, "sour": 0, "bitter": 0, "umami": 0},
+      "texture": ["顺滑"],
+      "evidence": "配料：饮用水。无任何呈味物质，六维全 0 —— 可作为口味向量的原点参照。"
+    },
+    {
+      "name": "豆浆",
+      "aliases": ["热豆浆"],
+      "category": "drink",
+      "temp": "hot",
+      "flavor": {"sweet": 2, "salty": 0, "spicy": 0, "sour": 0, "bitter": 0, "umami": 1},
+      "texture": ["顺滑"],
+      "evidence": "配料：大豆研磨浆液（早餐时段供应）。含少量天然糖分（甜2），豆香归入鲜味维度。"
+    },
+    {
+      "name": "原味甜筒",
+      "aliases": ["甜筒", "冰淇淋甜筒", "香草甜筒"],
+      "category": "dessert",
+      "temp": "cold",
+      "flavor": {"sweet": 4, "salty": 1, "spicy": 0, "sour": 0, "bitter": 0, "umami": 1},
+      "texture": ["绵密"],
+      "evidence": "配料：软冰淇淋（奶 + 糖）+ 华夫筒。乳制品带来奶香（鲜1）与微咸（咸1，乳中天然矿物质）。"
+    },
+    {
+      "name": "奥利奥麦旋风",
+      "aliases": ["麦旋风", "奥利奥麦旋风冰淇淋"],
+      "category": "dessert",
+      "temp": "cold",
+      "flavor": {"sweet": 5, "salty": 1, "spicy": 0, "sour": 0, "bitter": 1, "umami": 1},
+      "texture": ["绵密", "颗粒感"],
+      "evidence": "配料：软冰淇淋 + 奥利奥饼干碎。饼干碎提供颗粒咀嚼感，可可饼皮带来轻微苦味（苦1）。"
+    },
+    {
+      "name": "草莓麦旋风",
+      "aliases": ["草莓麦旋风冰淇淋"],
+      "category": "dessert",
+      "temp": "cold",
+      "flavor": {"sweet": 5, "salty": 1, "spicy": 0, "sour": 2, "bitter": 0, "umami": 1},
+      "texture": ["绵密", "颗粒感"],
+      "evidence": "配料：软冰淇淋 + 草莓酱/草莓碎。草莓果酸使甜中带酸（甜5/酸2）。"
+    },
+    {
+      "name": "新地(巧克力)",
+      "aliases": ["巧克力新地", "圣代"],
+      "category": "dessert",
+      "temp": "cold",
+      "flavor": {"sweet": 5, "salty": 1, "spicy": 0, "sour": 0, "bitter": 1, "umami": 1},
+      "texture": ["绵密", "顺滑"],
+      "evidence": "配料：软冰淇淋 + 巧克力酱。巧克力酱提升甜度并带来轻微苦味。"
+    },
+    {
+      "name": "新地(草莓)",
+      "aliases": ["草莓新地"],
+      "category": "dessert",
+      "temp": "cold",
+      "flavor": {"sweet": 5, "salty": 1, "spicy": 0, "sour": 2, "bitter": 0, "umami": 1},
+      "texture": ["绵密", "顺滑"],
+      "evidence": "配料：软冰淇淋 + 草莓酱。草莓果酸带来酸度（酸2）。"
+    },
+    {
+      "name": "香草冰淇淋",
+      "aliases": ["冰淇淋(杯)", "杯装冰淇淋"],
+      "category": "dessert",
+      "temp": "cold",
+      "flavor": {"sweet": 4, "salty": 1, "spicy": 0, "sour": 0, "bitter": 0, "umami": 1},
+      "texture": ["绵密", "顺滑"],
+      "evidence": "配料：软冰淇淋（奶 + 糖）。纯奶香基底，无额外酱料。"
+    },
+    {
+      "name": "芝士蛋糕",
+      "aliases": ["乳酪蛋糕"],
+      "category": "dessert",
+      "temp": "cold",
+      "flavor": {"sweet": 4, "salty": 2, "spicy": 0, "sour": 2, "bitter": 0, "umami": 2},
+      "texture": ["绵密", "顺滑"],
+      "evidence": "配料：奶油奶酪 + 糖 + 饼干底。奶油奶酪本身带天然咸味与乳酸酸味（咸2/酸2），是甜品中少见的咸甜并存款。"
+    },
+    {
+      "name": "提拉米苏",
+      "aliases": ["Tiramisu"],
+      "category": "dessert",
+      "temp": "cold",
+      "flavor": {"sweet": 4, "salty": 1, "spicy": 0, "sour": 0, "bitter": 2, "umami": 2},
+      "texture": ["绵密", "顺滑"],
+      "evidence": "配料：马斯卡彭奶酪 + 咖啡液浸泡手指饼 + 可可粉。咖啡与可可带来明显苦味（苦2）。"
+    },
+    {
+      "name": "猪柳蛋麦满分",
+      "aliases": ["猪柳蛋麦满分汉堡", "Sausage McMuffin with Egg"],
+      "category": "breakfast",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 4, "spicy": 1, "sour": 0, "bitter": 0, "umami": 4},
+      "texture": ["软嫩", "多汁"],
+      "evidence": "配料：英式马芬 + 猪柳肉饼 + 煎蛋 + 芝士（早餐时段供应）。猪柳为调味猪肉饼，咸香（咸4）；煎蛋与芝士提供软嫩与鲜味。"
+    },
+    {
+      "name": "猪柳麦满分",
+      "aliases": ["Sausage McMuffin"],
+      "category": "breakfast",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 4, "spicy": 1, "sour": 0, "bitter": 0, "umami": 3},
+      "texture": ["软嫩"],
+      "evidence": "配料：英式马芬 + 猪柳肉饼 + 芝士，无蛋。较猪柳蛋麦满分少一层蛋的软嫩与鲜味。"
+    },
+    {
+      "name": "烟肉蛋麦满分",
+      "aliases": ["培根蛋麦满分", "Bacon & Egg McMuffin"],
+      "category": "breakfast",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 5, "spicy": 1, "sour": 0, "bitter": 0, "umami": 4},
+      "texture": ["软嫩", "酥脆"],
+      "evidence": "配料：英式马芬 + 烟肉（培根）+ 煎蛋 + 芝士。烟肉为高盐腌制猪肉，咸度为早餐类最高（咸5），煎脆后提供酥脆感。"
+    },
+    {
+      "name": "吉士蛋麦满分",
+      "aliases": ["Cheeseburger McMuffin", "芝士蛋麦满分"],
+      "category": "breakfast",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 4, "spicy": 0, "sour": 1, "bitter": 0, "umami": 3},
+      "texture": ["软嫩"],
+      "evidence": "配料：英式马芬 + 煎蛋 + 芝士。无肉类，故鲜味低于含肉款，以蛋与芝士的咸鲜为主。"
+    },
+    {
+      "name": "热香饼",
+      "aliases": ["热香饼(3块)", "pancake", "松饼"],
+      "category": "breakfast",
+      "temp": "hot",
+      "flavor": {"sweet": 4, "salty": 1, "spicy": 0, "sour": 0, "bitter": 0, "umami": 1},
+      "texture": ["软嫩", "绵密"],
+      "evidence": "配料：面糊煎制松饼 + 配糖浆/黄油。本体微甜，蘸糖浆后甜度显著上升（甜4）；质地松软。"
+    },
+    {
+      "name": "早餐全餐",
+      "aliases": ["早餐拼盘"],
+      "category": "breakfast",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 4, "spicy": 1, "sour": 1, "bitter": 0, "umami": 4},
+      "texture": ["软嫩", "酥脆"],
+      "evidence": "为多品组合餐（含蛋、肉、薯饼等），口味取各组成项的综合中位值（推断）。实际口味随所选组合变化。"
+    },
+    {
+      "name": "油条",
+      "aliases": ["早餐油条"],
+      "category": "breakfast",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 2, "spicy": 0, "sour": 0, "bitter": 0, "umami": 1},
+      "texture": ["酥脆", "有嚼劲"],
+      "evidence": "配料：小麦面团油炸。含少量盐（咸2），以面香为主，无明显调味。"
+    },
+    {
+      "name": "脆薯饼",
+      "aliases": ["薯饼(早餐)"],
+      "category": "breakfast",
+      "temp": "hot",
+      "flavor": {"sweet": 0, "salty": 3, "spicy": 0, "sour": 0, "bitter": 0, "umami": 1},
+      "texture": ["酥脆"],
+      "evidence": "同侧食薯饼，早餐时段供应。"
+    },
+    {
+      "name": "火腿扒麦满分",
+      "aliases": ["火腿蛋麦满分"],
+      "category": "breakfast",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 4, "spicy": 0, "sour": 0, "bitter": 0, "umami": 3},
+      "texture": ["软嫩"],
+      "evidence": "配料：英式马芬 + 火腿扒 + 蛋 + 芝士。火腿为腌制品提供咸鲜（咸4）。"
+    },
+    {
+      "name": "双层安格斯厚牛堡",
+      "aliases": ["双层安格斯"],
+      "category": "burger",
+      "temp": "hot",
+      "flavor": {"sweet": 1, "salty": 5, "spicy": 0, "sour": 1, "bitter": 0, "umami": 5},
+      "texture": ["多汁", "软嫩"],
+      "evidence": "配料：双层安格斯牛肉饼 + 芝士。官网热点更新说明安格斯系列牛肉饼为纯安格斯牛肉、无油煎制。双层牛肉使鲜味与咸度均为最高档（鲜5/咸5）。"
+    },
+    {
+      "name": "麦辣鸡腿",
+      "aliases": ["单点麦辣鸡腿"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 0, "salty": 4, "spicy": 4, "sour": 0, "bitter": 0, "umami": 3},
+      "texture": ["酥脆", "多汁"],
+      "evidence": "与麦辣鸡腿汉堡所用鸡腿排同规格，辣味腌渍后裹粉炸制，辣4、炸制酥脆多汁。"
+    },
+    {
+      "name": "苹果派",
+      "aliases": ["苹果派(热)"],
+      "category": "side",
+      "temp": "hot",
+      "flavor": {"sweet": 5, "salty": 1, "spicy": 0, "sour": 2, "bitter": 0, "umami": 0},
+      "texture": ["酥脆", "绵密"],
+      "evidence": "配料：酥皮 + 苹果果酱馅。苹果含果酸，甜中带酸（甜5/酸2）；酥皮炸制提供酥脆感。"
+    },
+    {
+      "name": "冰拿铁",
+      "aliases": ["冰拿铁咖啡"],
+      "category": "drink",
+      "temp": "cold",
+      "flavor": {"sweet": 2, "salty": 0, "spicy": 0, "sour": 0, "bitter": 3, "umami": 1},
+      "texture": ["顺滑", "绵密"],
+      "evidence": "配料：浓缩咖啡 + 冰牛奶 + 冰块。甜苦结构与热拿铁一致，温度改为冰（cold）。"
+    },
+    {
+      "name": "香草拿铁",
+      "aliases": ["Vanilla Latte"],
+      "category": "drink",
+      "temp": "hot",
+      "flavor": {"sweet": 4, "salty": 0, "spicy": 0, "sour": 0, "bitter": 3, "umami": 1},
+      "texture": ["顺滑", "绵密"],
+      "evidence": "配料：浓缩咖啡 + 蒸奶 + 香草糖浆。香草糖浆显著提升甜度（甜4），是咖啡类中偏甜的一款。"
+    },
+    {
+      "name": "抹茶拿铁",
+      "aliases": ["Matcha Latte"],
+      "category": "drink",
+      "temp": "hot",
+      "flavor": {"sweet": 3, "salty": 0, "spicy": 0, "sour": 0, "bitter": 2, "umami": 1},
+      "texture": ["顺滑", "绵密"],
+      "evidence": "配料：抹茶粉 + 牛奶 + 糖。抹茶茶多酚带来轻涩苦感（苦2），含糖故偏甜（甜3）。"
+    },
+    {
+      "name": "麦咖啡可颂",
+      "aliases": ["可颂", "牛角包"],
+      "category": "breakfast",
+      "temp": "hot",
+      "flavor": {"sweet": 2, "salty": 2, "spicy": 0, "sour": 0, "bitter": 0, "umami": 1},
+      "texture": ["酥脆", "软嫩"],
+      "evidence": "配料：黄油千层酥皮烘焙。黄油提供奶香与微甜（甜2）、含盐黄油带来咸味（咸2），层次结构提供酥脆感。"
+    },
+    {
+      "name": "巧克力曲奇",
+      "aliases": ["曲奇", "饼干"],
+      "category": "dessert",
+      "temp": "hot",
+      "flavor": {"sweet": 5, "salty": 1, "spicy": 0, "sour": 0, "bitter": 1, "umami": 1},
+      "texture": ["酥脆", "颗粒感"],
+      "evidence": "配料：小麦粉 + 黄油 + 巧克力豆。巧克力豆带来轻微苦味（苦1），整体以甜为主（甜5），口感酥脆带颗粒。"
+    }
+  ]
+}

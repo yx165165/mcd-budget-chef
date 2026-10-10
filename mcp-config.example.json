@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "mcd-mcp": {
+      "type": "streamablehttp",
+      "url": "https://mcp.mcd.cn",
+      "headers": {
+        "Authorization": "Bearer ${MCD_MCP_TOKEN}"
+      }
+    }
+  },
+  "_comment": "脱敏示例，仅使用环境变量占位符 ${MCD_MCP_TOKEN}。请勿在此文件写入真实 Token。官方接入文档: https://github.com/M-China/mcd-mcp-server"
+}

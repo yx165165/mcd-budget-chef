@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 本地配置（可能含真实 Token，绝不提交）
+.env
+mcp-config.json
+*.local.json
+
+# 临时文件
+tmp/
+*.tmp
